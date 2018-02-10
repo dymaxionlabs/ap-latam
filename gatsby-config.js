@@ -1,6 +1,6 @@
 module.exports = {
   siteMetadata: {
-    title: 'Gatsby Default Starter',
+    title: 'Mapa de potenciales villas y asentamientos',
   },
   plugins: ['gatsby-plugin-react-helmet'],
 };
