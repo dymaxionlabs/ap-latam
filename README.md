@@ -1,13 +1,23 @@
-# gatsby-starter-default
-The default Gatsby starter
+# VyA Latam
 
-For an overview of the project structure please refer to the [Gatsby documentation - Building with Components](https://www.gatsbyjs.org/docs/building-with-components/)
+This repository contains the source code for the website of Vya Latam.
+Visit the website at https://dymaxionlabs.com/vya-latam/
 
-Install this starter (assuming Gatsby is installed) by running from your CLI:
-```
-gatsby new gatsby-example-site
-```
+## Install
 
-## Deploy
+To build and deploy you need to have Node and npm installed.  After cloning the
+repo, run `npm install` to install all dependencies.
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/gatsbyjs/gatsby-starter-default)
+## Develop
+
+Just run `gatsby develop` to start the development server. For a production
+build, run `gatsby build`.
+
+## License
+
+All files contained in the `data` directory are made available under the Public
+Domain Dedication and License version v1.0 whose full text can be found at
+http://opendatacommons.org/licenses/pddl/
+
+The web site source code is released under a BSD-2 license.  Refer to
+[LICENSE.md](LICENSE.md) for more information.
