@@ -1,7 +1,7 @@
 # VyA Latam
 
-This repository contains the source code for the website of Vya Latam.
-Visit the website at https://dymaxionlabs.com/vya-latam/
+This repository contains the source code for the website of VyA Latam.
+Visit the website at http://dymaxionlabs.com/vya-latam/
 
 ## Install
 
