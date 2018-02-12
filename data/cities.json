@@ -1,0 +1,42 @@
+[
+   {
+      "name" : "Buenos Aires",
+      "country" : "Argentina",
+      "path" : "argentina",
+      "center" : {
+         "lat" : -34.614948,
+         "lon" : -58.439854
+      },
+      "zoom" : 11
+   },
+   {
+      "name" : "Asunción",
+      "country" : "Paraguay",
+      "path" : "paraguay-asuncion",
+      "center" : {
+         "lon" : -57.521255,
+         "lat" : -25.291748
+      },
+      "zoom" : 12
+   },
+   {
+      "name" : "Guatemala",
+      "country" : "Guatemala",
+      "path" : "guatemala-guatemala",
+      "center" : {
+         "lat" : 14.62016,
+         "lon" : -90.51367
+      },
+      "zoom" : 12
+   },
+   {
+      "name" : "Tegucigalpa",
+      "country" : "Honduras",
+      "path" : "tegucigalpa-honduras",
+      "center" : {
+         "lat" : 14.08154,
+         "lon" : -87.19828
+      },
+      "zoom" : 12
+   }
+]
