@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Helmet from 'react-helmet'
 
-import Header from '../components/Header'
+import NavBar from '../components/navbar'
 import './index.sass'
 
 const TemplateWrapper = ({ children, data }) => (
@@ -14,7 +14,7 @@ const TemplateWrapper = ({ children, data }) => (
         { name: 'keywords', content: 'sample, something' },
       ]}
     />
-    <Header />
+    <NavBar name={data.site.siteMetadata.name} />
     <div>
       {children()}
     </div>
@@ -25,6 +25,7 @@ export const query = graphql`
   query LayoutQuery {
     site {
       siteMetadata {
+        name
         title
       }
     }
