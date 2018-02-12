@@ -1,19 +1,23 @@
 import React from 'react'
 import Link from 'gatsby-link'
 
-const NavBar = props => (
-  <nav className="navbar" role="navigation" aria-label="main pagination">
-    <div className="navbar-brand">
-      <Link to="/">{props.name}</Link>
+const NavBarBurger = props => {
+  const activeClass = props.active ? 'is-active' : ''
+  const classes = `button navbar-burger ${activeClass}`
+  return (
+    <button className={classes} onClick={props.handler}>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  )
+}
 
-      <button className="button navbar-burger" data-target="navMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-
-    <div className="navbar-menu" id="navMenu">
+const NavBarMenu = props => {
+  const activeClass = props.active ? 'is-active' : ''
+  const classes = `navbar-menu ${activeClass}`
+  return (
+    <div className={classes} id="navMenu">
       <div className="navbar-end">
         <a className="navbar-item">
           <Link to="/map">Mapa</Link>
@@ -32,28 +36,32 @@ const NavBar = props => (
         </a>
       </div>
     </div>
-  </nav>
-)
+  )
+}
+
+class NavBar extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {active: false}
+    this.toggleActive = this.toggleActive.bind(this)
+  }
+
+  toggleActive() {
+    this.setState((prevState, props) => ({active: !prevState.active}))
+    console.log(`toggle active: ${this.state.active}`)
+  }
+
+  render() {
+    return (
+      <nav className="navbar" role="navigation" aria-label="main pagination">
+        <div className="navbar-brand">
+          <Link to="/">{this.props.name}</Link>
+          <NavBarBurger active={this.state.active} handler={this.toggleActive} />
+        </div>
+        <NavBarMenu active={this.state.active} />
+      </nav>
+    )
+  }
+}
 
 export default NavBar
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Get all "navbar-burger" elements
-  let $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-
-  // Check if there are any navbar burgers
-  if ($navbarBurgers.length > 0) {
-    // Add a click event on each of them
-    $navbarBurgers.forEach(function ($el) {
-      $el.addEventListener('click', function () {
-        // Get the target from the "data-target" attribute
-        let target = $el.dataset.target;
-        let $target = document.getElementById(target);
-
-        // Toggle the class on both the "navbar-burger" and the "navbar-menu"
-        $el.classList.toggle('is-active');
-        $target.classList.toggle('is-active');
-      });
-    });
-  }
-});
