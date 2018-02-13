@@ -2,27 +2,16 @@ import React from 'react'
 import Link from 'gatsby-link'
 
 const CityList = props => {
-  const list = props.cities.map(city => {
-    const key = `${city.name}-${city.country}`
-    return (
-      <CityListItem key={key} value={city} />
-    )
-  })
-  return (
-    <ul>
-      {list}
-    </ul>
+  const list = props.cities.map(city =>
+    <CityListItem key={city.internalId} value={city} />
   )
+  return <ul>{list}</ul>
 }
 
 const CityListItem = props => {
-  const url = `/map#${props.value.path}`
+  const url = `/map?id=${props.value.internalId}`
   const name = `${props.value.name}, ${props.value.country}`
-  return (
-    <li>
-      <Link to={url}>{name}</Link>
-    </li>
-  )
+  return <li><Link to={url}>{name}</Link></li>
 }
 
 const IndexPage = ({ data }) => {
@@ -62,7 +51,7 @@ const IndexPage = ({ data }) => {
             vectorial de las áreas precarias detectadas, como así también otros datos
             analíticos generados, agrupados por ciudad y fecha de actualización.
           </p>
-          <Link className="button is-primary" to="/datos">Ver Datos</Link>
+          <Link className="button is-primary" to="/data">Ver Datos</Link>
         </div>
       </section>
       <section className="section">
@@ -70,7 +59,7 @@ const IndexPage = ({ data }) => {
           <h1 className="title">Publicaciones</h1>
           <p>En esta página podrás descargar y leer publicaciones sobre la
             metodología de detección.</p>
-          <Link className="button is-primary" to="/publicaciones">Ver Publicaciones</Link>
+          <Link className="button is-primary" to="/publications">Ver Publicaciones</Link>
         </div>
       </section>
       <section className="section">
@@ -87,7 +76,11 @@ const IndexPage = ({ data }) => {
       <section className="section">
         <div className="container">
           <h1 className="title">Licencia</h1>
-          <em>[Texto sobre licencia de la página, el uso de los datos, y las publicaciones]</em>
+          <p>
+            <em>[Texto sobre licencia de la página, el uso de los datos, y las
+              publicaciones]</em>
+          </p>
+          <Link className="button is-primary" to="/license">Ver Licencia</Link>
         </div>
       </section>
       <section className="section">
@@ -110,6 +103,7 @@ export const query = graphql`
     allCitiesJson {
       edges {
         node {
+          internalId
           name
           country
           path

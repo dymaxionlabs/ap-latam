@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactMapGL from 'react-map-gl'
 import css from './map.sass'
+import queryString from 'query-string'
 
 class Map extends React.Component {
   constructor(props) {
@@ -8,6 +9,8 @@ class Map extends React.Component {
 
     this.state = {
       viewport: {
+        width: window.innerWidth,
+        height: window.innerHeight,
         latitude: this.props.lat,
         longitude: this.props.lon,
         zoom: this.props.zoom
@@ -46,10 +49,11 @@ class Map extends React.Component {
 }
 
 const MapPage = ({ data }) => {
-  const cityName = 'Buenos Aires'
-  const countryName = 'Argentina'
-  const city = data.allCitiesJson.edges
-    .find(e => e.node.name == cityName && e.node.country == countryName).node
+  const parsedHash = queryString.parse(location.search);
+  const cityId = parsedHash.id
+  const cityEdge = data.allCitiesJson.edges.find(e => e.node.internalId === cityId)
+    || data.allCitiesJson.edges[0]
+  const city = cityEdge.node
   console.log(city)
 
   return <Map
@@ -64,6 +68,7 @@ export const query = graphql`
     allCitiesJson {
       edges {
         node {
+          internalId
           name
           country
           path
