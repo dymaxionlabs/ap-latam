@@ -16,7 +16,10 @@ export const query = graphql`
           name
           country
           path
-          center
+          center {
+            lat
+            lon
+          }
           zoom
         }
       }
