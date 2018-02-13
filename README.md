@@ -8,9 +8,12 @@ Visit the website at http://dymaxionlabs.com/vya-latam/
 To build and deploy you need to have Node and npm installed.  After cloning the
 repo, run `npm install` to install all dependencies.
 
+You have to create a `.env.development` and `.env.production` with the variable
+`MapboxAccessToken` defined in both files.
+
 ## Develop
 
-Just run `gatsby develop` to start the development server. For a production
+Simply run `gatsby develop` to start the development server. For a production
 build, run `gatsby build`.
 
 ## License
