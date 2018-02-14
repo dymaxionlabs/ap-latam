@@ -4,7 +4,7 @@ import Footer from '../components/footer'
 
 const FileListItem = props => (
   <li>
-    <Link to={props.node.publicURL}>{props.node.relativePath}</Link>
+    <a href={props.node.publicURL}>{props.node.relativePath}</a>
   </li>
 )
 
