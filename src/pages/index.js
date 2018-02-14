@@ -85,13 +85,13 @@ const IndexPage = ({ data }) => {
         <div className="container">
           <h1 className="title">Prensa</h1>
           <div className="content">
-            <em>[Acá van las notas publicadas del proyecto]</em>
+            <!-- notas publicadas del proyecto -->
           </div>
         </div>
       </section>
       <section className="section">
         <div className="container">
-          <em>[Acá van los logos de los sponsors]</em>
+          <!-- sponsors -->
         </div>
       </section>
       <section className="section">
@@ -99,10 +99,8 @@ const IndexPage = ({ data }) => {
           <h1 className="title">Licencia</h1>
           <div className="content">
             <p>
-              <em>
-                [Texto sobre licencia de la página, el uso de los datos, y las
-                publicaciones]
-              </em>
+              <!-- Texto sobre licencia de la página, el uso de los datos, y las
+                   publicaciones -->
             </p>
             <Link className="button is-primary" to="/license">
               Ver Licencia
@@ -114,7 +112,7 @@ const IndexPage = ({ data }) => {
         <div className="container">
           <h1 className="title">Contacto</h1>
           <div className="content">
-            <em>[Acá va la sección de contacto]</em>
+            <!-- contacto -->
           </div>
         </div>
       </section>
