@@ -19,11 +19,21 @@ const NavBarMenu = props => {
   return (
     <div className={classes} id="navMenu">
       <div className="navbar-end">
-        <Link className="navbar-item" to="/map">Mapa</Link>
-        <Link className="navbar-item" to="/data">Datos</Link>
-        <Link className="navbar-item" to="/publications">Publicaciones</Link>
-        <Link className="navbar-item" to="/license">Licencia</Link>
-        <Link className="navbar-item" to="/contact">Contacto</Link>
+        <Link className="navbar-item" to="/map">
+          Mapa
+        </Link>
+        <Link className="navbar-item" to="/data">
+          Datos
+        </Link>
+        <Link className="navbar-item" to="/publications">
+          Publicaciones
+        </Link>
+        <Link className="navbar-item" to="/license">
+          Licencia
+        </Link>
+        <Link className="navbar-item" to="/contact">
+          Contacto
+        </Link>
       </div>
     </div>
   )
@@ -45,7 +55,9 @@ class NavBar extends React.Component {
     return (
       <nav className="navbar" role="navigation" aria-label="main pagination">
         <div className="navbar-brand">
-          <Link style={{ fontWeight: 500 }} className="navbar-item" to="/">{this.props.name}</Link>
+          <Link style={{ fontWeight: 500 }} className="navbar-item" to="/">
+            {this.props.name}
+          </Link>
           <NavBarBurger
             active={this.state.active}
             handler={this.toggleActive}

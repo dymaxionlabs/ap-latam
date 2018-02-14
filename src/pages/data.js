@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'gatsby-link'
+import Footer from '../components/footer'
 
 const FileListItem = props => (
   <li>
@@ -14,9 +15,12 @@ const FileList = props => (
 const DataPage = ({ data }) => {
   const files = data.allFile.edges.map(e => e.node)
   return (
-    <div className="container">
-      <h1 className="title">Datos</h1>
-      <FileList files={files} />
+    <div>
+      <div className="container">
+        <h1 className="title">Datos</h1>
+        <FileList files={files} />
+      </div>
+      <Footer />
     </div>
   )
 }

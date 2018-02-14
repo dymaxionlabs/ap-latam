@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'gatsby-link'
+import Footer from '../components/footer'
 
 const CityList = props => {
   const list = props.cities.map(city => (
@@ -117,6 +118,8 @@ const IndexPage = ({ data }) => {
           </div>
         </div>
       </section>
+
+      <Footer />
     </div>
   )
 }
