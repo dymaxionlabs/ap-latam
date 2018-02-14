@@ -19,21 +19,11 @@ const NavBarMenu = props => {
   return (
     <div className={classes} id="navMenu">
       <div className="navbar-end">
-        <a className="navbar-item">
-          <Link to="/map">Mapa</Link>
-        </a>
-        <a className="navbar-item">
-          <Link to="/data">Datos</Link>
-        </a>
-        <a className="navbar-item">
-          <Link to="/publications">Publicaciones</Link>
-        </a>
-        <a className="navbar-item">
-          <Link to="/license">Licencia</Link>
-        </a>
-        <a className="navbar-item">
-          <Link to="/contact">Contacto</Link>
-        </a>
+        <Link className="navbar-item" to="/map">Mapa</Link>
+        <Link className="navbar-item" to="/data">Datos</Link>
+        <Link className="navbar-item" to="/publications">Publicaciones</Link>
+        <Link className="navbar-item" to="/license">Licencia</Link>
+        <Link className="navbar-item" to="/contact">Contacto</Link>
       </div>
     </div>
   )
