@@ -45,7 +45,7 @@ class NavBar extends React.Component {
     return (
       <nav className="navbar" role="navigation" aria-label="main pagination">
         <div className="navbar-brand">
-          <Link to="/">{this.props.name}</Link>
+          <Link style={{ fontWeight: 500 }} className="navbar-item" to="/">{this.props.name}</Link>
           <NavBarBurger
             active={this.state.active}
             handler={this.toggleActive}
