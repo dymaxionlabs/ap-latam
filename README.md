@@ -11,10 +11,28 @@ repo, run `yarn` to install all dependencies.
 You have to create a `.env.development` and `.env.production` with the variable
 `MapboxAccessToken` defined in both files.
 
+For updating Mapbox dataset, you also will need to have installed:
+* [tippecanoe](https://github.com/mapbox/tippecanoe/)
+* [mapbox-cli-py](https://github.com/mapbox/mapbox-cli-py)
+
 ## Develop
 
 Simply run `npm start` to start the development server. For a production build,
 run `npm run build`.
+
+### Update datasets
+
+The map view uses a Mapbox style to show datasets via vector tiles. If you add
+a new city, or update datasets, you should update the Mapbox dataset.
+
+```
+gejson-merge data/**/latest.geojson > /tmp/vya-latem.geojson
+tippecanoe -o /tmp/vya-latam.mbtiles -zg --drop-densest-as-needed /tmp/vya-latam.geojson
+mapbox upload $USER.vya-latam /tmp/vya-latam.mbtiles --access-token $TOKEN
+```
+
+where `$USER` is the Mapbox user, and `$TOKEN` is an access token with the
+appropriate permission for uploading datasets.
 
 ## License
 

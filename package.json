@@ -1,8 +1,8 @@
 {
-  "name": "gatsby-starter-default",
-  "description": "Gatsby default starter",
+  "name": "vya-latam-web",
+  "description": "vya-latam Website",
   "version": "1.0.0",
-  "author": "Kyle Mathews <mathews.kyle@gmail.com>",
+  "author": "Damián Silvani <damian@dymaxionlabs.com>",
   "dependencies": {
     "bulma": "^0.6.2",
     "gatsby": "^1.9.158",
@@ -18,7 +18,7 @@
   "keywords": [
     "gatsby"
   ],
-  "license": "MIT",
+  "license": "BSD-2",
   "main": "n/a",
   "scripts": {
     "build": "gatsby build",
@@ -28,6 +28,7 @@
     "deploy": "gatsby build --prefix-paths && gh-pages -d public"
   },
   "devDependencies": {
+    "geojson-merge": "^0.3.0",
     "gh-pages": "^1.1.0",
     "prettier": "^1.10.2"
   }
