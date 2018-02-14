@@ -9,12 +9,15 @@ class Map extends React.Component {
 
     this.state = {
       viewport: {
-        width: window.innerWidth,
-        height: window.innerHeight,
         latitude: this.props.lat,
         longitude: this.props.lon,
         zoom: this.props.zoom,
-      },
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      this.state.width = window.innerWidth
+      this.state.height = window.innerHeight
     }
   }
 
@@ -53,13 +56,16 @@ class Map extends React.Component {
 }
 
 const MapPage = ({ data }) => {
-  const parsedHash = queryString.parse(location.search)
-  const cityId = parsedHash.id
+  let cityId = null
+  if (typeof window !== 'undefined') {
+    const parsedHash = queryString.parse(window.location.search)
+    cityId = parsedHash.id
+  }
+
   const cityEdge =
     data.allCitiesJson.edges.find(e => e.node.internalId === cityId) ||
     data.allCitiesJson.edges[0]
   const city = cityEdge.node
-  console.log(city)
 
   return <Map zoom={city.zoom} lat={city.center.lat} lon={city.center.lon} />
 }

@@ -48,7 +48,6 @@ class NavBar extends React.Component {
 
   toggleActive() {
     this.setState((prevState, props) => ({ active: !prevState.active }))
-    console.log(`toggle active: ${this.state.active}`)
   }
 
   render() {
