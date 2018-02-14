@@ -8,11 +8,7 @@ const FileListItem = props => (
 )
 
 const FileList = props => (
-  <ul>
-    {props.files.map(node => (
-      <FileListItem key={node.id} node={node} />
-    ))}
-  </ul>
+  <ul>{props.files.map(node => <FileListItem key={node.id} node={node} />)}</ul>
 )
 
 const DataPage = ({ data }) => {
@@ -28,8 +24,8 @@ const DataPage = ({ data }) => {
 export const query = graphql`
   query DataQuery {
     allFile(
-      sort: {fields: [relativePath], order: ASC},
-      filter: {extension: {eq: "geojson"}}
+      sort: { fields: [relativePath], order: ASC }
+      filter: { extension: { eq: "geojson" } }
     ) {
       edges {
         node {

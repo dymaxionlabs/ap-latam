@@ -6,9 +6,9 @@ const NavBarBurger = props => {
   const classes = `button navbar-burger ${activeClass}`
   return (
     <button className={classes} onClick={props.handler}>
-      <span></span>
-      <span></span>
-      <span></span>
+      <span />
+      <span />
+      <span />
     </button>
   )
 }
@@ -42,12 +42,12 @@ const NavBarMenu = props => {
 class NavBar extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {active: false}
+    this.state = { active: false }
     this.toggleActive = this.toggleActive.bind(this)
   }
 
   toggleActive() {
-    this.setState((prevState, props) => ({active: !prevState.active}))
+    this.setState((prevState, props) => ({ active: !prevState.active }))
     console.log(`toggle active: ${this.state.active}`)
   }
 
@@ -56,7 +56,10 @@ class NavBar extends React.Component {
       <nav className="navbar" role="navigation" aria-label="main pagination">
         <div className="navbar-brand">
           <Link to="/">{this.props.name}</Link>
-          <NavBarBurger active={this.state.active} handler={this.toggleActive} />
+          <NavBarBurger
+            active={this.state.active}
+            handler={this.toggleActive}
+          />
         </div>
         <NavBarMenu active={this.state.active} />
       </nav>
