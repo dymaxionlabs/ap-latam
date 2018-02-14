@@ -12,7 +12,7 @@ class Map extends React.Component {
         latitude: this.props.lat,
         longitude: this.props.lon,
         zoom: this.props.zoom,
-      }
+      },
     }
 
     if (typeof window !== 'undefined') {
