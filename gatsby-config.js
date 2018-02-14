@@ -1,4 +1,5 @@
 module.exports = {
+  pathPrefix: '/vya-latam-web',
   siteMetadata: {
     name: 'VyA Latam',
     title: 'Mapa de potenciales villas y asentamientos'
