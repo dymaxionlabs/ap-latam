@@ -48,7 +48,7 @@ class Map extends React.Component {
         {...viewport}
         {...settings}
         id="map"
-        mapStyle="mapbox://styles/mapbox/satellite-streets-v9"
+        mapStyle="mapbox://styles/munshkr/cjdng40dl08ie2rocx25qe8zh"
         onViewportChange={this._onViewportChange}
       />
     )
