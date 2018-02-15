@@ -10,8 +10,8 @@ const TemplateWrapper = ({ children, data }) => (
     <Helmet
       title={data.site.siteMetadata.title}
       meta={[
-        { name: 'description', content: 'Sample' },
-        { name: 'keywords', content: 'sample, something' },
+        { name: 'description',
+          content: 'El mapa está elaborado a partir de la aplicación de técnicas de machine learning en imágenes satelitales y otros datos georreferenciados.' }
       ]}
     />
     <div>
