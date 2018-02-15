@@ -25,7 +25,7 @@
     "start": "gatsby develop",
     "format": "prettier --trailing-comma es5 --no-semi --single-quote --write \"src/**/*.js\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "gatsby build --prefix-paths && gh-pages -d public"
+    "deploy": "rimraf .cache/ public/ && gatsby build --prefix-paths && gh-pages -d public"
   },
   "devDependencies": {
     "geojson-merge": "^0.3.0",
