@@ -10,7 +10,10 @@ const PublicationsPage = () => (
           <ul className="list">
             <li>
               <p>
-                <a href="#" target="_blank">
+                <a
+                  href="http://digital.bl.fcen.uba.ar/gsdl-282/cgi-bin/library.cgi?a=d&c=tesis&d=Tesis_6172_Bayle"
+                  target="_blank"
+                >
                   Detección de villas y asentamientos informales en el partido
                   de La Matanza mediante teledetección y sistemas de información
                   geográfica
