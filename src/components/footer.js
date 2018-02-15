@@ -5,7 +5,7 @@ const Footer = () => (
     <div className="container">
       <div className="content has-text-centered">
         <p>
-          <strong>VyA Latam</strong> por{' '}
+          <strong>AP Latam</strong> por{' '}
           <a href="https://dymaxionlabs.com">Dymaxion Labs</a>.<br />
           El código fuente está bajo licencia{' '}
           <a href="https://opensource.org/licenses/BSD-2-Clause">

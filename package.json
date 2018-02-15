@@ -1,8 +1,8 @@
 {
-  "name": "vya-latam-web",
-  "description": "vya-latam Website",
+  "name": "ap-latam-web",
+  "description": "ap-latam Website",
   "version": "1.0.0",
-  "author": "Damián Silvani <damian@dymaxionlabs.com>",
+  "author": "Damián Silvani <damian@dymaxionlabs.com>, Federico Baylé <federico@dymaxionlabs.com>",
   "dependencies": {
     "bulma": "^0.6.2",
     "gatsby": "^1.9.158",

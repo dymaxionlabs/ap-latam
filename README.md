@@ -1,7 +1,7 @@
-# VyA Latam
+# AP Latam
 
-This repository contains the source code for the website of VyA Latam.
-Visit the website at http://dymaxionlabs.com/vya-latam/
+This repository contains the source code for the website of AP Latam.
+Visit the website at http://dymaxionlabs.com/ap-latam/
 
 ## Install
 
@@ -26,9 +26,9 @@ The map view uses a Mapbox style to show datasets via vector tiles. If you add
 a new city, or update datasets, you should update the Mapbox dataset.
 
 ```
-gejson-merge data/**/latest.geojson > /tmp/vya-latem.geojson
-tippecanoe -o /tmp/vya-latam.mbtiles -zg --drop-densest-as-needed /tmp/vya-latam.geojson
-mapbox upload $USER.vya-latam /tmp/vya-latam.mbtiles --access-token $TOKEN
+geojson-merge data/**/latest.geojson > /tmp/ap-latem.geojson
+tippecanoe -o /tmp/ap-latam.mbtiles -zg --drop-densest-as-needed /tmp/ap-latam.geojson
+mapbox upload $USER.ap-latam /tmp/ap-latam.mbtiles --access-token $TOKEN
 ```
 
 where `$USER` is the Mapbox user, and `$TOKEN` is an access token with the

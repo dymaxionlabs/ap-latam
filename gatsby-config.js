@@ -1,7 +1,7 @@
 module.exports = {
-  pathPrefix: '/vya-latam',
+  pathPrefix: '/ap-latam',
   siteMetadata: {
-    name: 'VyA Latam',
+    name: 'AP Latam',
     title: 'Mapa de potenciales villas y asentamientos',
     press: [{
       name: "La Nación",
