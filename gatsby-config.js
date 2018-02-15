@@ -40,5 +40,12 @@ module.exports = {
         anonymize: true,
       },
     },
+    {
+      resolve: 'gatsby-plugin-i18n',
+      options: {
+        langKeyDefault: 'es',
+        useLangKeyLayout: false
+      }
+    }
   ],
 };

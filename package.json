@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "gatsby-plugin-google-analytics": "^1.0.19",
+    "gatsby-plugin-i18n": "^0.4.1",
     "geojson-merge": "^0.3.0",
     "gh-pages": "^1.1.0",
     "prettier": "^1.10.2"
