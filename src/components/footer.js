@@ -5,12 +5,12 @@ const Footer = () => (
     <div className="container">
       <div className="content has-text-centered">
         <p>
-          <strong>Vya Latam</strong> by{' '}
-          <a href="https://dymaxionlabs.com">Dymaxion Labs</a>. The source code
-          is licensed under{' '}
+          <strong>VyA Latam</strong> por{' '}
+          <a href="https://dymaxionlabs.com">Dymaxion Labs</a>.<br />
+          El código fuente está bajo licencia{' '}
           <a href="https://opensource.org/licenses/BSD-2-Clause">
             BSD-2 Clause
-          </a>. The website content is licensed{' '}
+          </a>. El contenido del sitio web está bajo licencia{' '}
           <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
             CC BY NC SA 4.0
           </a>.

@@ -17,7 +17,7 @@ class Map extends React.Component {
 
     if (typeof window !== 'undefined') {
       this.state.width = window.innerWidth
-      this.state.height = window.innerHeight
+      this.state.height = this._height()
     }
   }
 
@@ -37,9 +37,18 @@ class Map extends React.Component {
 
   _resize = () =>
     this._onViewportChange({
-      width: this.props.width || window.innerWidth,
-      height: this.props.height || window.innerHeight,
+      width: window.innerWidth,
+      height: this._height(),
     })
+
+  _height() {
+    const navbar = document.getElementsByClassName("navbar")[0]
+    if (navbar) {
+      return (window.innerHeight - navbar.clientHeight)
+    } else {
+      return window.innerHeight
+    }
+  }
 
   render() {
     const { viewport, settings } = this.state
@@ -47,7 +56,6 @@ class Map extends React.Component {
       <ReactMapGL
         {...viewport}
         {...settings}
-        id="map"
         mapStyle="mapbox://styles/munshkr/cjdng40dl08ie2rocx25qe8zh"
         onViewportChange={this._onViewportChange}
       />

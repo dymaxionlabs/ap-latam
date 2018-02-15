@@ -16,10 +16,15 @@ const DataPage = ({ data }) => {
   const files = data.allFile.edges.map(e => e.node)
   return (
     <div>
-      <div className="container">
-        <h1 className="title">Datos</h1>
-        <FileList files={files} />
-      </div>
+      <section className="section">
+        <div className="container">
+          <h1 className="title">Datos</h1>
+          <div className="content">
+            <p />
+            <FileList files={files} />
+          </div>
+        </div>
+      </section>
       <Footer />
     </div>
   )

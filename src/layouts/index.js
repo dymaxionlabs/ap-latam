@@ -14,8 +14,10 @@ const TemplateWrapper = ({ children, data }) => (
         { name: 'keywords', content: 'sample, something' },
       ]}
     />
-    <NavBar name={data.site.siteMetadata.name} />
-    <div>{children()}</div>
+    <div>
+      <NavBar name={data.site.siteMetadata.name} />
+      {children()}
+    </div>
   </div>
 )
 
