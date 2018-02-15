@@ -2,22 +2,35 @@ import React from 'react'
 import Link from 'gatsby-link'
 import Footer from '../components/footer'
 
-const CityList = props => {
-  const list = props.cities.map(city => (
-    <CityListItem key={city.internalId} value={city} />
-  ))
-  return <ul>{list}</ul>
-}
+import styles from './index.sass'
+import mapboxLogo from '../assets/mapbox-logo-color.png'
+
+const CityList = props => (
+  <ul>{props.items.map(item => <CityListItem key={item.internalId} item={item} />)}</ul>
+)
 
 const CityListItem = props => {
-  const url = `/map?id=${props.value.internalId}`
-  const name = `${props.value.name}, ${props.value.country}`
+  const url = `/map?id=${props.item.internalId}`
+  const name = `${props.item.name}, ${props.item.country}`
   return (
     <li>
       <Link to={url}>{name}</Link>
     </li>
   )
 }
+
+const NewsList = props => (
+  <table className="table is-fullwidth">
+    {props.items.map(item => <NewsListItem key={item.url} item={item} />)}
+  </table>
+)
+
+const NewsListItem = props => (
+  <tr>
+    <th>{props.item.name}</th>
+    <td><a href={props.item.url} target="_blank">{props.item.title}</a></td>
+  </tr>
+)
 
 const IndexPage = ({ data }) => {
   const cities = data.allCitiesJson.edges.map(v => v.node)
@@ -48,7 +61,7 @@ const IndexPage = ({ data }) => {
           <h2 className="subtitle">
             Haz clic sobre el nombre de una ciudad para explorar el mapa.
           </h2>
-          <CityList cities={cities} />
+          <CityList items={cities} />
         </div>
       </section>
       <section className="section">
@@ -84,11 +97,20 @@ const IndexPage = ({ data }) => {
       <section className="section">
         <div className="container">
           <h1 className="title">Prensa</h1>
-          <div className="content">{/* Notas publicadas del proyecto */}</div>
+          <div className="content">
+            <NewsList items={data.site.siteMetadata.press} />
+          </div>
         </div>
       </section>
       <section className="section">
-        <div className="container">{/* Sponsors */}</div>
+        <div className="container">
+          <h1 className="title">Con el apoyo de</h1>
+          <div className="has-text-centered">
+            <ul className="sponsors">
+              <li><a href="https://www.mapbox.com"><img src={mapboxLogo} alt="Mapbox" /></a></li>
+            </ul>
+          </div>
+        </div>
       </section>
       <section className="section">
         <div className="container">
@@ -107,7 +129,9 @@ const IndexPage = ({ data }) => {
       <section className="section">
         <div className="container">
           <h1 className="title">Contacto</h1>
-          <div className="content">{/* Contacto */}</div>
+          <div className="content">
+            <p>Si tiene alguna duda sobre la metodología o los datos ofrecidos, no dude en contactarnos por <a href="mailto:contacto+vyalatam@dymaxionalabs.com">e-mail</a></p>
+          </div>
         </div>
       </section>
 
@@ -121,6 +145,11 @@ export const query = graphql`
     site {
       siteMetadata {
         name
+        press {
+          name
+          title
+          url
+        }
       }
     }
     allCitiesJson {

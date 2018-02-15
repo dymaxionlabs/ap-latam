@@ -6,7 +6,9 @@ const ContactPage = () => (
     <section className="section">
       <div className="container">
         <h1 className="title">Contacto</h1>
-        <div className="content" />
+        <div className="content">
+          <p>Si tiene alguna duda sobre la metodología o los datos ofrecidos, no dude en contactarnos por <a href="mailto:contacto+vyalatam@dymaxionalabs.com">e-mail</a></p>
+        </div>
       </div>
     </section>
     <Footer />
