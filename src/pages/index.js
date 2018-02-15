@@ -46,7 +46,7 @@ const IndexPage = ({ data }) => {
   return (
     <div>
       <section className="hero is-medium is-primary is-bold">
-        <div className="hero-body">
+        <div className="logo hero-body">
           <div className="container">
             <h1 className="title is-1">{data.site.siteMetadata.name}</h1>
             <h2 className="subtitle is-4">
