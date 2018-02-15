@@ -2,7 +2,7 @@ module.exports = {
   pathPrefix: '/ap-latam',
   siteMetadata: {
     name: 'AP Latam',
-    title: 'Mapa de potenciales asentamientos informales y barrios precarios',
+    title: 'Monitor de potenciales asentamientos informales y barrios precarios',
     press: [{
       name: "La Nación",
       title: "Desarrollan un mapa online que permite monitorear el crecimiento de las villas en la Argentina",
