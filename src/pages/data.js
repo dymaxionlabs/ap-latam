@@ -6,7 +6,9 @@ const FileListItem = props => {
   const filename = props.node.relativePath.split('/')[1]
   return (
     <li>
-      <a href={props.node.publicURL} download={filename}>{props.node.relativePath}</a>
+      <a href={props.node.publicURL} download={filename}>
+        {props.node.relativePath}
+      </a>
     </li>
   )
 }
@@ -35,6 +37,16 @@ const DataPage = ({ data }) => {
 
 export const query = graphql`
   query DataQuery {
+    allCitiesJson {
+      edges {
+        node {
+          internalId
+          name
+          country
+          path
+        }
+      }
+    }
     allFile(
       sort: { fields: [relativePath], order: ASC }
       filter: { extension: { eq: "geojson" } }

@@ -42,9 +42,9 @@ class Map extends React.Component {
     })
 
   _height() {
-    const navbar = document.getElementsByClassName("navbar")[0]
+    const navbar = document.getElementsByClassName('navbar')[0]
     if (navbar) {
-      return (window.innerHeight - navbar.clientHeight)
+      return window.innerHeight - navbar.clientHeight
     } else {
       return window.innerHeight
     }

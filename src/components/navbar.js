@@ -28,9 +28,6 @@ const NavBarMenu = props => {
         <Link className="navbar-item" to="/publications">
           Publicaciones
         </Link>
-        <Link className="navbar-item" to="/license">
-          Licencia
-        </Link>
         <Link className="navbar-item" to="/contact">
           Contacto
         </Link>

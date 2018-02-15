@@ -11,8 +11,8 @@ const PublicationsPage = () => (
             <li>
               <p>
                 <a href="#" target="_blank">
-                  Detección de villas y asentamientos informales en el partido de
-                  La Matanza mediante teledetección y sistemas de información
+                  Detección de villas y asentamientos informales en el partido
+                  de La Matanza mediante teledetección y sistemas de información
                   geográfica
                 </a>
               </p>
@@ -25,15 +25,15 @@ const PublicationsPage = () => (
                 fuentes de información. En el presente trabajo se hizo un
                 ejercicio de ese tipo para detectar villas y asentamientos en el
                 Partido de La Matanza considerando el relevamiento realizado por
-                la ONG Techo en 2013. El objetivo es proponer una metodología que
-                reduzca el área del territorio a relevar, teniendo en cuenta la
-                periodicidad y actualización de los conjuntos de datos. Se
+                la ONG Techo en 2013. El objetivo es proponer una metodología
+                que reduzca el área del territorio a relevar, teniendo en cuenta
+                la periodicidad y actualización de los conjuntos de datos. Se
                 utilizaron datos censales, viales y naturales georreferenciados,
                 imágenes satelitales y algoritmos de aprendizaje automático. Los
-                resultados muestran que usando la metodología propuesta con todas
-                las fuentes de datos mencionadas se logra reducir el territorio a
-                un 16% (51km2), mientras que considerando solamente imágenes se
-                reduce a 30% (96km2).
+                resultados muestran que usando la metodología propuesta con
+                todas las fuentes de datos mencionadas se logra reducir el
+                territorio a un 16% (51km2), mientras que considerando solamente
+                imágenes se reduce a 30% (96km2).
               </p>
             </li>
           </ul>

@@ -6,7 +6,11 @@ import styles from './index.sass'
 import mapboxLogo from '../assets/mapbox-logo-color.png'
 
 const CityList = props => (
-  <ul>{props.items.map(item => <CityListItem key={item.internalId} item={item} />)}</ul>
+  <ul>
+    {props.items.map(item => (
+      <CityListItem key={item.internalId} item={item} />
+    ))}
+  </ul>
 )
 
 const CityListItem = props => {
@@ -28,7 +32,11 @@ const NewsList = props => (
 const NewsListItem = props => (
   <tr>
     <th>{props.item.name}</th>
-    <td><a href={props.item.url} target="_blank">{props.item.title}</a></td>
+    <td>
+      <a href={props.item.url} target="_blank">
+        {props.item.title}
+      </a>
+    </td>
   </tr>
 )
 
@@ -107,7 +115,11 @@ const IndexPage = ({ data }) => {
           <h1 className="title">Con el apoyo de</h1>
           <div className="has-text-centered">
             <ul className="sponsors">
-              <li><a href="https://www.mapbox.com"><img src={mapboxLogo} alt="Mapbox" /></a></li>
+              <li>
+                <a href="https://www.mapbox.com">
+                  <img src={mapboxLogo} alt="Mapbox" />
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -117,12 +129,20 @@ const IndexPage = ({ data }) => {
           <h1 className="title">Licencia</h1>
           <div className="content">
             <p>
-              {/* Texto sobre licencia de la página, el uso de los datos, y las
-                  publicaciones */}
+              Los datos disponibles para descargar fueron publicados bajo la{' '}
+              <a href="http://opendatacommons.org/licenses/pddl/">
+                Licencia de Dominio Público de Open Data Commons 1.0
+              </a>.<br />
+              Es libre de copiar, distribuir y dar uso de los datos, producir
+              nuevos trabajos en base a éstos, y de modificar y transformarlos.
             </p>
-            <Link className="button is-primary" to="/license">
+            <a
+              className="button is-primary"
+              href="https://opendatacommons.org/licenses/pddl/"
+              target="_blank"
+            >
               Ver Licencia
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -130,7 +150,11 @@ const IndexPage = ({ data }) => {
         <div className="container">
           <h1 className="title">Contacto</h1>
           <div className="content">
-            <p>Si tiene alguna duda sobre la metodología o los datos ofrecidos, no dude en contactarnos por <a href="mailto:contacto@dymaxionalabs.com">e-mail</a></p>
+            <p>
+              Si tiene alguna duda sobre la metodología o los datos ofrecidos,
+              no dude en contactarnos por{' '}
+              <a href="mailto:contacto@dymaxionalabs.com">e-mail</a>
+            </p>
           </div>
         </div>
       </section>
