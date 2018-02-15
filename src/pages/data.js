@@ -2,11 +2,14 @@ import React from 'react'
 import Link from 'gatsby-link'
 import Footer from '../components/footer'
 
-const FileListItem = props => (
-  <li>
-    <a href={props.node.publicURL}>{props.node.relativePath}</a>
-  </li>
-)
+const FileListItem = props => {
+  const filename = props.node.relativePath.split('/')[1]
+  return (
+    <li>
+      <a href={props.node.publicURL} download={filename}>{props.node.relativePath}</a>
+    </li>
+  )
+}
 
 const FileList = props => (
   <ul>{props.files.map(node => <FileListItem key={node.id} node={node} />)}</ul>
