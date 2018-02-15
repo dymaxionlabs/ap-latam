@@ -28,6 +28,7 @@
     "deploy": "rimraf .cache/ public/ && gatsby build --prefix-paths && gh-pages -d public"
   },
   "devDependencies": {
+    "gatsby-plugin-google-analytics": "^1.0.19",
     "geojson-merge": "^0.3.0",
     "gh-pages": "^1.1.0",
     "prettier": "^1.10.2"
