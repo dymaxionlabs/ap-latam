@@ -4,13 +4,13 @@ import Link from 'gatsby-link'
 const CityList = props => (
   <ul>
     {props.items.map(item => (
-      <CityListItem key={item.internalId} lang={props.lang} item={item} />
+      <CityListItem key={item.internalId} prefix={props.prefix} item={item} />
     ))}
   </ul>
 )
 
 const CityListItem = props => {
-  const url = `/${props.lang}/map?id=${props.item.internalId}`
+  const url = `${props.prefix}/map?id=${props.item.internalId}`
   const name = `${props.item.name}, ${props.item.country}`
   return (
     <li>

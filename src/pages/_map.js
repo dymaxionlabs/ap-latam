@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactMapGL from 'react-map-gl'
-import css from './map.sass'
 import queryString from 'query-string'
 
 class Map extends React.Component {
@@ -64,12 +63,14 @@ class Map extends React.Component {
 }
 
 const MapPage = ({ data }) => {
+  // Parse city id from window query string
   let cityId = null
   if (typeof window !== 'undefined') {
-    const parsedHash = queryString.parse(window.location.search)
-    cityId = parsedHash.id
+    const parsedQueryString = queryString.parse(window.location.search)
+    cityId = parsedQueryString.id
   }
 
+  // Find city node or fallback to default (first of the list)
   const cityEdge =
     data.allCitiesJson.edges.find(e => e.node.internalId === cityId) ||
     data.allCitiesJson.edges[0]

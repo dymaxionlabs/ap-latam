@@ -4,7 +4,6 @@ import Footer from '../components/footer'
 import { CityList, CityListItem } from '../components/city_list'
 import { NewsList, NewsListItem } from '../components/news_list'
 
-import styles from './index.sass'
 import mapboxLogo from '../assets/mapbox-logo-color.png'
 
 const IndexPage = ({ data }) => {
@@ -37,7 +36,7 @@ const IndexPage = ({ data }) => {
           <h2 className="subtitle">
             Haz clic sobre el nombre de una ciudad para explorar el mapa.
           </h2>
-          <CityList lang="es" items={cities} />
+          <CityList prefix="/es" items={cities} />
         </div>
       </section>
       <section className="section">

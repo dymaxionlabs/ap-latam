@@ -17,13 +17,12 @@ const TemplateWrapper = ({ children, data }) => (
       ]}
     />
     <div>
-      <NavBar basepath="/es" name={data.site.siteMetadata.name}>
+      <NavBar prefix="/es" name={data.site.siteMetadata.name}>
         <NavBarItem name="Mapa" url="/es/map" />
         <NavBarItem name="Datos" url="/es/data" />
         <NavBarItem name="Publicaciones" url="/es/publications" />
         <NavBarItem name="Contacto" url="/es/contact" />
       </NavBar>
-
       {children()}
     </div>
   </div>

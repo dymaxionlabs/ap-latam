@@ -44,7 +44,7 @@ class NavBar extends React.Component {
     return (
       <nav className="navbar" role="navigation" aria-label="main pagination">
         <div className="navbar-brand">
-          <Link style={{ fontWeight: 500 }} className="navbar-item" to={this.props.basepath}>
+          <Link style={{ fontWeight: 500 }} className="navbar-item" to={this.props.prefix}>
             {this.props.name}
           </Link>
           <NavBarBurger
