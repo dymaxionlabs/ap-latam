@@ -7,10 +7,7 @@ const Footer = () => (
         <p>
           <strong>AP Latam</strong> por{' '}
           <a href="http://dymaxionlabs.com">Dymaxion Labs</a>.<br />
-          El código fuente está bajo licencia{' '}
-          <a href="https://opensource.org/licenses/BSD-2-Clause">
-            BSD-2 Clause
-          </a>. El contenido del sitio web está bajo licencia{' '}
+          El contenido del sitio web está bajo licencia{' '}
           <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
             CC BY NC SA 4.0
           </a>.
