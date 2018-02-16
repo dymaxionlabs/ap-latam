@@ -1,5 +1,5 @@
 import React from 'react'
-import Footer from '../components/footer'
+import Footer from './_footer.en'
 import { FileList, FileListItem } from '../components/file_list'
 
 const DataEnPage = ({ props, data }) => {

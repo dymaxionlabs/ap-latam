@@ -1,6 +1,6 @@
 import React from 'react'
 import Link from 'gatsby-link'
-import Footer from '../components/footer'
+import Footer from './_footer.es'
 import { CityList, CityListItem } from '../components/city_list'
 import { NewsList, NewsListItem } from '../components/news_list'
 

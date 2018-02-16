@@ -1,5 +1,5 @@
 import React from 'react'
-import Footer from '../components/footer'
+import Footer from './_footer.en'
 
 const ContactPage = () => (
   <div>
@@ -9,7 +9,7 @@ const ContactPage = () => (
         <div className="content">
           <p>
             If you have any question about our methodology or data, contact us
-            via <a href="mailto:contacto@dymaxionalabs.com">e-mail</a>
+            via <a href="mailto:contact@dymaxionalabs.com">e-mail</a>
           </p>
         </div>
       </div>
