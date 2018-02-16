@@ -78,8 +78,8 @@ const MapPage = ({ data }) => {
   return <Map zoom={city.zoom} lat={city.center.lat} lon={city.center.lon} />
 }
 
-export const query = graphql`
-  query MapQuery {
+export const mapFragment = graphql`
+  fragment MapFragment on RootQueryType {
     allCitiesJson {
       edges {
         node {

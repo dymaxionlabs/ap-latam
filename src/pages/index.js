@@ -1,172 +1,48 @@
 import React from 'react'
-import Link from 'gatsby-link'
-import Footer from '../components/footer'
+import graphql from 'graphql'
+import { getUserLangKey } from 'ptz-i18n'
+import { withPrefix } from 'gatsby-link'
 
-import styles from './index.sass'
-import mapboxLogo from '../assets/mapbox-logo-color.png'
+class RedirectIndex extends React.PureComponent {
+  constructor(args) {
+    super(args)
 
-const CityList = props => (
-  <ul>
-    {props.items.map(item => (
-      <CityListItem key={item.internalId} item={item} />
-    ))}
-  </ul>
-)
+    // Skip build, Browsers only
+    if (typeof window !== 'undefined') {
+      const { langs, defaultLangKey } = args.data.site.siteMetadata.languages
+      const langKey = getUserLangKey(langs, defaultLangKey)
+      const homeUrl = withPrefix(`/${langKey}/`)
 
-const CityListItem = props => {
-  const url = `/map?id=${props.item.internalId}`
-  const name = `${props.item.name}, ${props.item.country}`
-  return (
-    <li>
-      <Link to={url}>{name}</Link>
-    </li>
-  )
+      // I don`t think this is the best solution
+      // I would like to use Gatsby Redirects like:
+      // https://github.com/gatsbyjs/gatsby/tree/master/examples/using-redirects
+      // But Gatsby Redirects are static, they need to be specified at build time,
+      // This redirect is dynamic, It needs to know the user browser language.
+      // Any ideias? Join the issue: https://github.com/angeloocana/gatsby-starter-default-i18n/issues/4
+      window.___history.replace(homeUrl)
+    }
+  }
+
+  render() {
+    return <div />
+  }
 }
 
-const NewsList = props => (
-  <table className="table is-fullwidth">
-    {props.items.map(item => <NewsListItem key={item.url} item={item} />)}
-  </table>
-)
+export default RedirectIndex
 
-const NewsListItem = props => (
-  <tr>
-    <th>{props.item.name}</th>
-    <td>
-      <a href={props.item.url} target="_blank">
-        {props.item.title}
-      </a>
-    </td>
-  </tr>
-)
-
-const IndexPage = ({ data }) => {
-  const cities = data.allCitiesJson.edges.map(v => v.node)
-
-  return (
-    <div>
-      <section className="hero is-medium is-primary is-bold">
-        <div className="logo hero-body">
-          <div className="container">
-            <h1 className="title is-1">{data.site.siteMetadata.name}</h1>
-            <h2 className="subtitle is-4">
-              Monitor de potenciales asentamientos informales y barrios
-              precarios
-            </h2>
-            <div className="content">
-              <p>
-                El mapa está elaborado a partir de la aplicación de técnicas
-                de&nbsp;
-                <em>machine learning</em> en imágenes satelitales y otros datos
-                georreferenciados.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Explorar</h1>
-          <h2 className="subtitle">
-            Haz clic sobre el nombre de una ciudad para explorar el mapa.
-          </h2>
-          <CityList items={cities} />
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Accede a los datos</h1>
-          <div className="content">
-            <p>
-              Aquí podrás acceder a los datos presentados en el mapa, tanto la
-              capa vectorial de las áreas precarias detectadas, como así también
-              otros datos analíticos generados, agrupados por ciudad y fecha de
-              actualización.
-            </p>
-            <Link className="button is-primary" to="/data">
-              Ver Datos
-            </Link>
-          </div>
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Publicaciones</h1>
-          <div className="content">
-            <p>
-              En esta página podrás descargar y leer publicaciones sobre la
-              metodología de detección.
-            </p>
-            <Link className="button is-primary" to="/publications">
-              Ver Publicaciones
-            </Link>
-          </div>
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Prensa</h1>
-          <div className="content">
-            <NewsList items={data.site.siteMetadata.press} />
-          </div>
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Con el apoyo de</h1>
-          <div className="has-text-centered">
-            <ul className="sponsors">
-              <li>
-                <a href="https://www.mapbox.com">
-                  <img src={mapboxLogo} alt="Mapbox" />
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Licencia</h1>
-          <div className="content">
-            <p>
-              Los datos disponibles para descargar fueron publicados bajo la{' '}
-              <a href="http://opendatacommons.org/licenses/pddl/">
-                Licencia de Dominio Público de Open Data Commons 1.0
-              </a>.<br />
-              Es libre de copiar, distribuir y dar uso de los datos, producir
-              nuevos trabajos en base a éstos, y de modificar y transformarlos.
-            </p>
-            <a
-              className="button is-primary"
-              href="https://opendatacommons.org/licenses/pddl/"
-              target="_blank"
-            >
-              Ver Licencia
-            </a>
-          </div>
-        </div>
-      </section>
-      <section className="section">
-        <div className="container">
-          <h1 className="title">Contacto</h1>
-          <div className="content">
-            <p>
-              Si tiene alguna duda sobre la metodología o los datos ofrecidos,
-              no dude en contactarnos por{' '}
-              <a href="mailto:contacto@dymaxionalabs.com">e-mail</a>
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-    </div>
-  )
-}
-
-export const query = graphql`
+export const indexFragment = graphql`
   query IndexQuery {
+    site {
+      siteMetadata {
+        languages {
+          defaultLangKey
+          langs
+        }
+      }
+    }
+  }
+
+  fragment IndexFragment on RootQueryType {
     site {
       siteMetadata {
         name
@@ -189,5 +65,3 @@ export const query = graphql`
     }
   }
 `
-
-export default IndexPage

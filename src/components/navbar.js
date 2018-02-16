@@ -13,24 +13,17 @@ const NavBarBurger = props => {
   )
 }
 
+const NavBarItem = props => (
+  <Link className="navbar-item" to={props.url}>{props.name}</Link>
+)
+
 const NavBarMenu = props => {
   const activeClass = props.active ? 'is-active' : ''
   const classes = `navbar-menu ${activeClass}`
   return (
     <div className={classes} id="navMenu">
       <div className="navbar-end">
-        <Link className="navbar-item" to="/map">
-          Mapa
-        </Link>
-        <Link className="navbar-item" to="/data">
-          Datos
-        </Link>
-        <Link className="navbar-item" to="/publications">
-          Publicaciones
-        </Link>
-        <Link className="navbar-item" to="/contact">
-          Contacto
-        </Link>
+        {props.children}
       </div>
     </div>
   )
@@ -51,7 +44,7 @@ class NavBar extends React.Component {
     return (
       <nav className="navbar" role="navigation" aria-label="main pagination">
         <div className="navbar-brand">
-          <Link style={{ fontWeight: 500 }} className="navbar-item" to="/">
+          <Link style={{ fontWeight: 500 }} className="navbar-item" to={this.props.basepath}>
             {this.props.name}
           </Link>
           <NavBarBurger
@@ -59,10 +52,12 @@ class NavBar extends React.Component {
             handler={this.toggleActive}
           />
         </div>
-        <NavBarMenu active={this.state.active} />
+        <NavBarMenu active={this.state.active}>
+          {this.props.children}
+        </NavBarMenu>
       </nav>
     )
   }
 }
 
-export default NavBar
+export default {NavBar, NavBarItem}

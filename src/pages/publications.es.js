@@ -1,7 +1,7 @@
 import React from 'react'
 import Footer from '../components/footer'
 
-const PublicationsPage = () => (
+const PublicationsEsPage = () => (
   <div>
     <section className="section">
       <div className="container">
@@ -47,4 +47,4 @@ const PublicationsPage = () => (
   </div>
 )
 
-export default PublicationsPage
+export default PublicationsEsPage
