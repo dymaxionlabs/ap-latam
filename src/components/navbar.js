@@ -1,6 +1,8 @@
 import React from 'react'
 import Link from 'gatsby-link'
 
+import dymLogo from '../assets/dym-logo.png'
+
 const LanguageSelector = props => {
   const langNames = {
     'en': 'English',
@@ -71,6 +73,7 @@ class NavBar extends React.Component {
         <div className="navbar-brand">
           <Link style={{ fontWeight: 500 }} className="navbar-item" to={this.props.prefix}>
             {this.props.name}
+            <img style={{ height: "1.5rem", marginLeft: "0.5rem" }} src={dymLogo} alt="" />
           </Link>
           <NavBarBurger
             active={this.state.active}
