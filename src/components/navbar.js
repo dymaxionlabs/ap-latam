@@ -13,9 +13,9 @@ const LanguageSelector = props => {
       </a>
       <div className="navbar-dropdown">
         {Object.entries(langNames).map(lang => {
-          const href = `/${lang[0]}`
+          const to = `/${lang[0]}`
           return (
-            <a key={lang[0]} href={href} className="navbar-item">{lang[1]}</a>
+            <Link key={lang[0]} to={to} className="navbar-item">{lang[1]}</Link>
           )
         })}
       </div>
