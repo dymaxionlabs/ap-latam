@@ -5,6 +5,7 @@ import { CityList, CityListItem } from '../components/city_list'
 import { NewsList, NewsListItem } from '../components/news_list'
 
 import mapboxLogo from '../assets/mapbox-logo-color.png'
+import techoLogo from '../assets/techo-logo.png'
 
 const IndexPage = ({ data }) => {
   const cities = data.allCitiesJson.edges.map(v => v.node)
@@ -85,6 +86,11 @@ const IndexPage = ({ data }) => {
               <li>
                 <a href="https://www.mapbox.com">
                   <img src={mapboxLogo} alt="Mapbox" />
+                </a>
+              </li>
+              <li>
+                <a href="https://www.techo.org/">
+                  <img src={techoLogo} alt="TECHO" />
                 </a>
               </li>
             </ul>
