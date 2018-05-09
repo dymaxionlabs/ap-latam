@@ -8,9 +8,9 @@ virtualenv:
   system_site_packages: true
 env:
   matrix:
-    - PYTHON_VERSION="3.4" COVERAGE="true"
-    - PYTHON_VERSION="3.5" COVERAGE="false"
-    - PYTHON_VERSION="3.6" COVERAGE="false"
+    - DISTRUB="ubuntu" PYTHON_VERSION="3.4" COVERAGE="true"
+    - DISTRUB="ubuntu" PYTHON_VERSION="3.5" COVERAGE="false"
+    - DISTRUB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
 addons:
   apt:
     packages:
