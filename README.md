@@ -5,7 +5,7 @@ This is the main repository of AP Latam project.
 For more information on the website frontend, see
 [web/README.md](web/README.md).
 
-## Develop
+## Development
 
 Create a virtual environment for Python 3 and activate it:
 
