@@ -4,5 +4,5 @@
 # Example:
 # numpy==1.13.3
 # scipy==1.0
-pytest
-tox
+pytest==3.5.1
+tox==3.0.0
