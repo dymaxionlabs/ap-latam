@@ -37,6 +37,27 @@ def parse_args(args):
         '--version',
         action='version',
         version='aplatam {ver}'.format(ver=__version__))
+
+    parser.add_argument(
+        'rasters_dir',
+        help='directory containing raster images')
+    parser.add_argument(
+        'vector',
+        help='vector file of polygons')
+    parser.add_argument(
+        '-c',
+        '--config-file',
+        help='configuration file')
+    parser.add_argument(
+        '-o',
+        '--output-model',
+        default='model.h5',
+        help='filename for output model')
+    parser.add_argument(
+        '--seed',
+        type=int,
+        help='seed number for the random number generator')
+
     parser.add_argument(
         '-v',
         '--verbose',

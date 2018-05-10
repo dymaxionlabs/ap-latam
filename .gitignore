@@ -8,6 +8,7 @@ venv/
 *.so
 *.cfg
 !setup.cfg
+!default.cfg
 *.orig
 *.log
 *.pot
