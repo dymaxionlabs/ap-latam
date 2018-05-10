@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-    Setup file for aplatam.
+Setup file for aplatam.
 
-    This file was generated with PyScaffold 3.0.
-    PyScaffold helps you to put up the scaffold of your new Python project.
-    Learn more under: http://pyscaffold.readthedocs.org/
+This file was generated with PyScaffold 3.0.
+PyScaffold helps you to put up the scaffold of your new Python project.
+Learn more under: http://pyscaffold.readthedocs.org/
+
 """
 
 import sys
@@ -14,9 +15,8 @@ from setuptools import setup
 # Add here console scripts and other entry points in ini-style format
 entry_points = """
 [console_scripts]
-# script_name = aplatam.module:function
-# For example:
-# fibonacci = aplatam.skeleton:run
+ap_train = aplatam.train:run
+ap_detect = aplatam.detect:run
 """
 
 
