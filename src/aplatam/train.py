@@ -12,6 +12,7 @@ import sys
 import logging
 
 from aplatam import __version__
+from aplatam.util import all_raster_files
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -98,10 +99,14 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    #_logger.debug("Starting script...")
-    # ...
-    _logger.warn("Not done yet")
-    #_logger.info("Done")
+
+    _logger.debug('Collect all rasters')
+    rasters = all_raster_files(args.rasters_dir)
+    _logger.debug(rasters)
+
+    #_logger.debug("Validate rasters")
+
+    _logger.info("Done")
 
 
 def run():
