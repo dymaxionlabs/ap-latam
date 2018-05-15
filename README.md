@@ -5,9 +5,17 @@ This is the main repository of AP Latam project.
 For more information on the website frontend, see
 [web/README.md](web/README.md).
 
+## Dependencies
+
 ## Development
 
-Create a virtual environment for Python 3 and activate it:
+You will need to have installed GDAL and Proj4. On Debian-based distros run:
+
+```
+sudo apt install libproj-dev gdal-bin
+```
+
+Then, create a virtual environment for Python 3 and activate it:
 
 ```
 virtualenv -p python3 env/
