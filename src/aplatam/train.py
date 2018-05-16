@@ -10,9 +10,11 @@ from __future__ import division, print_function, absolute_import
 import argparse
 import sys
 import logging
-
+import rasterio
+import fiona 
 from aplatam import __version__
 from aplatam.util import all_raster_files
+
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -103,11 +105,31 @@ def main(args):
     _logger.debug('Collect all rasters')
     rasters = all_raster_files(args.rasters_dir)
     _logger.debug(rasters)
+    validate_rasters_crs(rasters)
+    validate_vector_crs(rasters, args.vector)
+
 
     #_logger.debug("Validate rasters")
 
     _logger.info("Done")
 
+def validate_rasters_crs(rasters):
+    _logger.debug('Validate rasters crs')
+    prev_crs = None 
+    for raster_path in rasters:
+        with rasterio.open(raster_path) as dataset: 
+            if prev_crs is not None and prev_crs != dataset.crs :
+                raise RuntimeError('CRC mismatch in some raster')
+            prev_crs = dataset.crs
+
+def validate_vector_crs(rasters, vector):
+    _logger.debug('Validate vector crs')
+    with fiona.open(vector) as vector_src:
+        vect_crs = vector_src.crs
+    with rasterio.open(rasters[0]) as raster_src:
+        raster_crs = raster_src
+    if vect_crs != raster_crs:
+        raise RuntimeError('CRS mismatch between vector file and rasters')
 
 def run():
     """Entry point for console_scripts"""
@@ -115,4 +137,5 @@ def run():
 
 
 if __name__ == "__main__":
+        
     run()
