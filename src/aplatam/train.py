@@ -107,6 +107,7 @@ def main(args):
     _logger.debug(rasters)
     validate_rasters_crs(rasters)
     validate_vector_crs(rasters, args.vector)
+    validate_rasters_band_count(rasters)
 
 
     #_logger.debug("Validate rasters")
@@ -127,9 +128,17 @@ def validate_vector_crs(rasters, vector):
     with fiona.open(vector) as vector_src:
         vect_crs = vector_src.crs
     with rasterio.open(rasters[0]) as raster_src:
-        raster_crs = raster_src
+        raster_crs = raster_src.crs
     if vect_crs != raster_crs:
         raise RuntimeError('CRS mismatch between vector file and rasters')
+
+def validate_rasters_band_count(rasters):
+    _logger.debug('Validate rasters band count')
+    for raster_path in rasters:
+        with rasterio.open(raster_path) as dataset:
+           if dataset.count != 4:
+                raise RuntimeError('Rasters must have exactly 4 bands')
+
 
 def run():
     """Entry point for console_scripts"""
