@@ -104,40 +104,59 @@ def main(args):
 
     _logger.debug('Collect all rasters')
     rasters = all_raster_files(args.rasters_dir)
-    _logger.debug(rasters)
+
     validate_rasters_crs(rasters)
     validate_vector_crs(rasters, args.vector)
     validate_rasters_band_count(rasters)
 
+    _logger.info('Done')
 
-    #_logger.debug("Validate rasters")
-
-    _logger.info("Done")
 
 def validate_rasters_crs(rasters):
-    _logger.debug('Validate rasters crs')
+    _logger.debug('Validate rasters CRS')
     prev_crs = None 
     for raster_path in rasters:
-        with rasterio.open(raster_path) as dataset: 
-            if prev_crs is not None and prev_crs != dataset.crs :
-                raise RuntimeError('CRC mismatch in some raster')
-            prev_crs = dataset.crs
+        current_crs = get_raster_crs(raster_path)
+        if prev_crs is not None and prev_crs != current_crs:
+            raise RuntimeError('CRC mismatch in some raster')
+        prev_crs = current_crs
+    return True
+
 
 def validate_vector_crs(rasters, vector):
-    _logger.debug('Validate vector crs')
-    with fiona.open(vector) as vector_src:
-        vect_crs = vector_src.crs
-    with rasterio.open(rasters[0]) as raster_src:
-        raster_crs = raster_src.crs
+    _logger.debug('Validate vector CRS')
+    raster_crs = get_raster_crs(rasters[0])
+    vect_crs = get_vector_crs(vector)
     if vect_crs != raster_crs:
         raise RuntimeError('CRS mismatch between vector file and rasters')
+    return True
+
+
+def get_raster_crs(raster_path):
+    """Return CRS of +raster_path+"""
+    with rasterio.open(raster_path) as dataset:
+        return dataset.crs
+
+
+def get_vector_crs(vector_path):
+    """Return CRS of +vector_path+"""
+    with fiona.open(vector_path) as dataset:
+        return dataset.crs
+
 
 def validate_rasters_band_count(rasters):
     _logger.debug('Validate rasters band count')
     for raster_path in rasters:
-        with rasterio.open(raster_path) as dataset:
-           if dataset.count != 4:
-                raise RuntimeError('Rasters must have exactly 4 bands')
+        count = get_raster_band_count(raster_path)
+        if count != 4:
+            raise RuntimeError('Rasters must have exactly 4 bands (was {})'.format(count))
+    return True
+
+
+def get_raster_band_count(raster_path):
+    """Return band count of +raster_path+"""
+    with rasterio.open(raster_path) as dataset:
+        return dataset.count
 
 
 def run():
@@ -146,5 +165,4 @@ def run():
 
 
 if __name__ == "__main__":
-        
     run()
