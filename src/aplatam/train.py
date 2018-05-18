@@ -14,6 +14,7 @@ import rasterio
 import fiona 
 from aplatam import __version__
 from aplatam.util import all_raster_files
+import configparser
 
 
 __author__ = "Dymaxion Labs"
@@ -50,6 +51,7 @@ def parse_args(args):
     parser.add_argument(
         '-c',
         '--config-file',
+        default = "default.cfg",
         help='configuration file')
     parser.add_argument(
         '-o',
@@ -108,6 +110,7 @@ def main(args):
     validate_rasters_crs(rasters)
     validate_vector_crs(rasters, args.vector)
     validate_rasters_band_count(rasters)
+    read_config_file(args.config_file)
 
     _logger.info('Done')
 
@@ -159,6 +162,13 @@ def get_raster_band_count(raster_path):
         return dataset.count
 
 
+def read_config_file(config_file):
+    _logger.debug('read config file')
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    return config["train"]
+    
+    
 def run():
     """Entry point for console_scripts"""
     main(sys.argv[1:])
