@@ -6,3 +6,6 @@ cov:
 
 test:
 	poetry run pytest
+
+build_image:
+	docker build -t aplatam .
