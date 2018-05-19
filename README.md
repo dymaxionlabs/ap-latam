@@ -12,7 +12,7 @@ For more information on the website frontend, see
 You will need to have installed GDAL and Proj4. On Debian-based distros run:
 
 ```
-sudo apt install libproj-dev gdal-bin  build-essential  libgdal-dev
+sudo apt install libproj-dev gdal-bin build-essential libgdal-dev libspatialindex-dev
 ```
 
 Then, create a virtual environment for Python 3 and activate it:
