@@ -12,7 +12,8 @@ import tempfile
 import json
 
 import sys, os
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 
 
 def create_index(features):
@@ -26,24 +27,31 @@ def create_index(features):
 def prob_mean_filter(feature_id, features, ix, neigh):
     f_id = int(feature_id)
     f_shape = shape(features[f_id]['geometry'])
-    nearest_shapes = list(ix.nearest(f_shape.bounds,1))
+    nearest_shapes = list(ix.nearest(f_shape.bounds, 1))
     nearest_shapes.remove(f_id)
     if len(nearest_shapes) < neigh:
         mean_filter_prob = 0
     else:
-        nearest_probs = [features[f]['properties']['prob'] for f in nearest_shapes]
+        nearest_probs = [
+            features[f]['properties']['prob'] for f in nearest_shapes
+        ]
         mean_filter_prob = np.mean(np.array(nearest_probs))
     return mean_filter_prob
-   
+
 
 def write_geojson(features, output_path, ix, neigh):
     d = {'type': 'FeatureCollection', 'features': []}
-    for feature in features :
-        feat = {'type': 'Feature',
-                'geometry': mapping(shape(feature['geometry'])),
-                'properties': {'prob_filt': prob_mean_filter(feature['id'], features, ix, int(neigh)),
-                               'prob': feature['properties']['prob']}
-                }
+    for feature in features:
+        feat = {
+            'type': 'Feature',
+            'geometry': mapping(shape(feature['geometry'])),
+            'properties': {
+                'prob_filt':
+                prob_mean_filter(feature['id'], features, ix, int(neigh)),
+                'prob':
+                feature['properties']['prob']
+            }
+        }
         if feat['properties']['prob_filt'] > 0.3:
             d['features'].append(feat)
     with open(output_path, 'w') as f:
@@ -58,17 +66,15 @@ def main(args):
 
 if __name__ == "__main__":
     import argparse
-    
-    parser = argparse.ArgumentParser(
-            description='Filter isolated polygons based on nearest neighbors presence and compute mean probability',
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('input_file',
-            help='Results vector file')
-    parser.add_argument('output_file',
-            help='Filtered vector file')
-    parser.add_argument('neighbors',
-            help='Number of neighbors')
+    parser = argparse.ArgumentParser(
+        description=
+        'Filter isolated polygons based on nearest neighbors presence and compute mean probability',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    parser.add_argument('input_file', help='Results vector file')
+    parser.add_argument('output_file', help='Filtered vector file')
+    parser.add_argument('neighbors', help='Number of neighbors')
 
     args = parser.parse_args()
 

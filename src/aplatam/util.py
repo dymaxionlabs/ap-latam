@@ -8,11 +8,12 @@ from functools import partial
 from shapely.ops import transform
 import rasterio
 
+
 def all_raster_files(dirname, ext='.tif'):
     """Generate any raster files inside +dirname+, recursively"""
     pattern = '**/*{ext}'.format(ext=ext)
     return glob(os.path.join(dirname, pattern), recursive=True)
-    
+
 
 def create_index(shapes):
     """Create an R-Tree index from a set of shapes"""
@@ -29,7 +30,8 @@ def sliding_windows(size, step_size, raster_size):
         for j in range(0, w, step_size):
             diff_i = (i + size - h) if i + size > h else 0
             diff_j = (j + size - w) if j + size > w else 0
-            yield (i - diff_i, i + size - diff_i), (j - diff_j, j + size - diff_j)
+            yield (i - diff_i, i + size - diff_i), (j - diff_j,
+                                                    j + size - diff_j)
 
 
 def window_to_bounds(window, affine):
@@ -40,11 +42,13 @@ def window_to_bounds(window, affine):
     maxy = ((window[1][1], window[0][0]) * affine)[1]
     return minx, miny, maxx, maxy
 
+
 def reproject_shape(shape, src_epsg, dst_epsg):
     """Reprojects a shape from some projection to another"""
-    project = partial(pyproj.transform,
-            pyproj.Proj(init=src_epsg),
-            pyproj.Proj(init=dst_epsg))
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init=src_epsg),
+        pyproj.Proj(init=dst_epsg))
     return transform(project, shape)
 
 

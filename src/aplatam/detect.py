@@ -31,8 +31,7 @@ def parse_args(args):
       :obj:`argparse.Namespace`: command line parameters namespace
 
     """
-    parser = argparse.ArgumentParser(
-        description="...")
+    parser = argparse.ArgumentParser(description="...")
     parser.add_argument(
         '--version',
         action='version',
@@ -63,8 +62,11 @@ def setup_logging(loglevel):
 
     """
     logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
-    logging.basicConfig(level=loglevel, stream=sys.stdout,
-                        format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
+    logging.basicConfig(
+        level=loglevel,
+        stream=sys.stdout,
+        format=logformat,
+        datefmt="%Y-%m-%d %H:%M:%S")
 
 
 def main(args):

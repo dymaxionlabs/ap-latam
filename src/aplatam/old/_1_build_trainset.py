@@ -28,7 +28,8 @@ import sys
 import tqdm
 import pdb
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 from aplatam.old.util import reproject_shape, window_to_bounds, create_index, sliding_windows
 
 epsg3857_crs = 'epsg:3857'
@@ -56,7 +57,12 @@ def grouper(iterable, n, fillvalue=None):
     return zip_longest(*args, fillvalue=fillvalue)
 
 
-def write_window_tiles(shapes, output_dir, tile_fname, size=64, step_size=16, rescale_intensity=True):
+def write_window_tiles(shapes,
+                       output_dir,
+                       tile_fname,
+                       size=64,
+                       step_size=16,
+                       rescale_intensity=True):
     "Extract windows of +size+ by sliding it +step_size+ on a raster, and write files"
 
     # Create R-Tree index with shapes to speed up intersection operation
@@ -73,10 +79,13 @@ def write_window_tiles(shapes, output_dir, tile_fname, size=64, step_size=16, re
             window_box = box(*window_to_bounds(window, src.transform))
 
             # Get shapes whose bounding boxes intersect with window box
-            matching_shapes = [shapes[s_id]
-                    for s_id in index.intersection(window_box.bounds)]
+            matching_shapes = [
+                shapes[s_id] for s_id in index.intersection(window_box.bounds)
+            ]
             try:
-                if matching_shapes and any(s.intersection(window_box).area > 0.0 for s in matching_shapes):
+                if matching_shapes and any(
+                        s.intersection(window_box).area > 0.0
+                        for s in matching_shapes):
                     img_class = 't'
                 #temp_windows.append(window_box)
                 else:
@@ -84,14 +93,16 @@ def write_window_tiles(shapes, output_dir, tile_fname, size=64, step_size=16, re
 
             # Prepare img filename
                 fname, _ = os.path.splitext(os.path.basename(tile_fname))
-                win_fname = '{}__{}_{}.jpg'.format(fname, window[0][0], window[1][0])
+                win_fname = '{}__{}_{}.jpg'.format(fname, window[0][0],
+                                                   window[1][0])
 
-            # Create class directory
+                # Create class directory
                 img_dir = os.path.join(path, img_class)
                 os.makedirs(img_dir, exist_ok=True)
 
-            # Extract image from raster and preprocess
-                rgb = np.dstack([src.read(b, window=window) for b in range(1, 4)])
+                # Extract image from raster and preprocess
+                rgb = np.dstack(
+                    [src.read(b, window=window) for b in range(1, 4)])
 
                 if rescale_intensity:
                     low, high = np.percentile(rgb, intensity_percentiles)
@@ -137,8 +148,8 @@ def split_train_test(files, output_dir, validation_size):
 
     Xt_test, Xt_train = true_files[:n_test], true_files[n_test:]
     Xf_test, Xf_train = false_files[:n_test], false_files[n_test:]
-    print('Xt_train:', len(Xt_train), 'Xt_test:', len(Xt_test),
-          'Xf_train:', len(Xf_train), 'Xf_test:', len(Xf_test))
+    print('Xt_train:', len(Xt_train), 'Xt_test:', len(Xt_test), 'Xf_train:',
+          len(Xf_train), 'Xf_test:', len(Xf_test))
 
     move_files(Xt_train, os.path.join(output_dir, 'train', 't'))
     move_files(Xf_train, os.path.join(output_dir, 'train', 'f'))
@@ -164,16 +175,16 @@ def main(args):
     # Generate default output path based on parameters
     if args.output_dir == default_output_dir:
         args.output_dir = args.output_dir.format(
-                size=args.size,
-                step_size=args.step_size,
-                buffer=args.buffer)
+            size=args.size, step_size=args.step_size, buffer=args.buffer)
 
     # Open vector file and fetch feature geometries
     with fiona.open(args.vector_file) as src:
         src_crs = src.crs['init']
         # Reproject shapes to WGS84 pseudomercator so we can apply a buffer in meters
-       	shapes = [reproject_shape(shape(f['geometry']), src_crs, epsg3857_crs)
-                    for f in src]
+        shapes = [
+            reproject_shape(shape(f['geometry']), src_crs, epsg3857_crs)
+            for f in src
+        ]
 
     # Extend shapes with a fixed-size buffer (if requested)
     if args.buffer > 0:
@@ -195,12 +206,19 @@ def main(args):
                     'Run with --overwrite to overwrite all files inside, ' \
                     'or choose some other path.'.format(args.output_dir))
 
-    write_metadata(args.output_dir, size=args.size,
-            step_size=args.step_size, buffer=args.buffer)
+    write_metadata(
+        args.output_dir,
+        size=args.size,
+        step_size=args.step_size,
+        buffer=args.buffer)
 
-    extract_all_images(args.input_dir, args.output_dir, shapes_with_buffer,
-            size=args.size, step_size=args.step_size,
-            rescale_intensity=args.rescale_intensity)
+    extract_all_images(
+        args.input_dir,
+        args.output_dir,
+        shapes_with_buffer,
+        size=args.size,
+        step_size=args.step_size,
+        rescale_intensity=args.rescale_intensity)
 
     true_files = glob.glob(os.path.join(args.output_dir, 'all', 't', '*.jpg'))
     false_files = glob.glob(os.path.join(args.output_dir, 'all', 'f', '*.jpg'))
@@ -210,7 +228,8 @@ def main(args):
     #        undersample=undersample, limit=args.limit)
 
     # Split all images into train/test directories, based on args.validation_size
-    split_train_test((true_files, false_files), args.output_dir, args.validation_size)
+    split_train_test((true_files, false_files), args.output_dir,
+                     args.validation_size)
 
     print('Done')
 
@@ -223,31 +242,51 @@ if __name__ == "__main__":
                         'high resolution multiband rasters',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    default_output_dir = os.path.join('data', 'hires','clips' ,'{size}_{step_size}_{buffer}')
+    default_output_dir = os.path.join('data', 'hires', 'clips',
+                                      '{size}_{step_size}_{buffer}')
 
-    parser.add_argument('vector_file',
-            help='Vector data file with tagged geometries (Shapefile, GeoJSON, etc.)')
-    parser.add_argument('input_dir',
-            help='Path where hi-res images are stored')
-    parser.add_argument('--output-dir', default=default_output_dir,
-            help='Path where train/validation tiles will be stored')
-    parser.add_argument('--size', type=int, default=128,
-            help='Window size')
-    parser.add_argument('--step-size', type=int, default=64,
-            help='Window step size')
-    parser.add_argument('--buffer', type=int, default=0,
-            help='Buffer size')
-    parser.add_argument('--validation-size', type=int, default=0.25,
-            help='Validation dataset size with respect to the complete dataset')
-    parser.add_argument('--overwrite', '-f', action='store_true', default=False,
-            help='Overwrite existing output directory and files')
-    parser.add_argument('--rescale-intensity', action='store_true', default=True,
-            help='Rescale intensity of images, with percentiles {}'.format(intensity_percentiles))
-    parser.add_argument('--no-undersample', action='store_false', default=False,
-            help='Do not balance classes by undersampling the larger class')
+    parser.add_argument(
+        'vector_file',
+        help=
+        'Vector data file with tagged geometries (Shapefile, GeoJSON, etc.)')
+    parser.add_argument(
+        'input_dir', help='Path where hi-res images are stored')
+    parser.add_argument(
+        '--output-dir',
+        default=default_output_dir,
+        help='Path where train/validation tiles will be stored')
+    parser.add_argument('--size', type=int, default=128, help='Window size')
+    parser.add_argument(
+        '--step-size', type=int, default=64, help='Window step size')
+    parser.add_argument('--buffer', type=int, default=0, help='Buffer size')
+    parser.add_argument(
+        '--validation-size',
+        type=int,
+        default=0.25,
+        help='Validation dataset size with respect to the complete dataset')
+    parser.add_argument(
+        '--overwrite',
+        '-f',
+        action='store_true',
+        default=False,
+        help='Overwrite existing output directory and files')
+    parser.add_argument(
+        '--rescale-intensity',
+        action='store_true',
+        default=True,
+        help='Rescale intensity of images, with percentiles {}'.format(
+            intensity_percentiles))
+    parser.add_argument(
+        '--no-undersample',
+        action='store_false',
+        default=False,
+        help='Do not balance classes by undersampling the larger class')
     parser.add_argument('--seed', '-s', type=int, help='Random seed')
-    parser.add_argument('--limit', type=int, default=1000,
-            help='Use only a limited set of samples with positive label')
+    parser.add_argument(
+        '--limit',
+        type=int,
+        default=1000,
+        help='Use only a limited set of samples with positive label')
 
     args = parser.parse_args()
 

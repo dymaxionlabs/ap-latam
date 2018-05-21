@@ -38,8 +38,7 @@ def dissolve_overlapping_shapes(shapes):
 def write_geojson(shapes, output_path):
     d = {'type': 'FeatureCollection', 'features': []}
     for shape in shapes:
-        feat = {'type': 'Feature',
-                'geometry': mapping(shape)}
+        feat = {'type': 'Feature', 'geometry': mapping(shape)}
         d['features'].append(feat)
     with open(output_path, 'w') as f:
         f.write(json.dumps(d))
@@ -57,13 +56,12 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(
-            description='Post process results from classification',
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        description='Post process results from classification',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('input_file',
-            help='Results vector file')
-    parser.add_argument('output_file',
-            help='Post processed results vector file')
+    parser.add_argument('input_file', help='Results vector file')
+    parser.add_argument(
+        'output_file', help='Post processed results vector file')
 
     args = parser.parse_args()
 

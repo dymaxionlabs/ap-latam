@@ -11,14 +11,13 @@ import argparse
 import sys
 import logging
 import rasterio
-import fiona 
+import fiona
 from aplatam import __version__
 from aplatam.util import all_raster_files
 import configparser
 from aplatam.util import get_raster_crs
-from aplatam.build_trainset import  build_trainset
+from aplatam.build_trainset import build_trainset
 import tempfile
-
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -38,23 +37,19 @@ def parse_args(args):
       :obj:`argparse.Namespace`: command line parameters namespace
 
     """
-    parser = argparse.ArgumentParser(
-        description="...")
+    parser = argparse.ArgumentParser(description="...")
     parser.add_argument(
         '--version',
         action='version',
         version='aplatam {ver}'.format(ver=__version__))
 
     parser.add_argument(
-        'rasters_dir',
-        help='directory containing raster images')
-    parser.add_argument(
-        'vector',
-        help='vector file of polygons')
+        'rasters_dir', help='directory containing raster images')
+    parser.add_argument('vector', help='vector file of polygons')
     parser.add_argument(
         '-c',
         '--config-file',
-        default = "default.cfg",
+        default="default.cfg",
         help='configuration file')
     parser.add_argument(
         '-o',
@@ -62,15 +57,12 @@ def parse_args(args):
         default='model.h5',
         help='filename for output model')
     parser.add_argument(
-        '--seed',
-        type=int,
-        help='seed number for the random number generator')
+        '--seed', type=int, help='seed number for the random number generator')
 
     parser.add_argument(
         "--temp-dir",
         default=tempfile.gettempdir(),
-        help='path to temporary files'
-    )
+        help='path to temporary files')
 
     parser.add_argument(
         '-v',
@@ -98,8 +90,11 @@ def setup_logging(loglevel):
 
     """
     logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
-    logging.basicConfig(level=loglevel, stream=sys.stdout,
-                        format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
+    logging.basicConfig(
+        level=loglevel,
+        stream=sys.stdout,
+        format=logformat,
+        datefmt="%Y-%m-%d %H:%M:%S")
 
 
 def main(args):
@@ -120,13 +115,13 @@ def main(args):
     validate_vector_crs(rasters, args.vector)
     validate_rasters_band_count(rasters)
     read_config_file(args.config_file)
-    build_trainset(rasters, args.vector,args.config_file, args.temp_dir)
+    build_trainset(rasters, args.vector, args.config_file, args.temp_dir)
     _logger.info('Done')
 
 
 def validate_rasters_crs(rasters):
     _logger.debug('Validate rasters CRS')
-    prev_crs = None 
+    prev_crs = None
     for raster_path in rasters:
         current_crs = get_raster_crs(raster_path)
         if prev_crs is not None and prev_crs != current_crs:
@@ -155,7 +150,8 @@ def validate_rasters_band_count(rasters):
     for raster_path in rasters:
         count = get_raster_band_count(raster_path)
         if count != 4:
-            raise RuntimeError('Rasters must have exactly 4 bands (was {})'.format(count))
+            raise RuntimeError(
+                'Rasters must have exactly 4 bands (was {})'.format(count))
     return True
 
 
@@ -170,8 +166,8 @@ def read_config_file(config_file):
     config = configparser.ConfigParser()
     config.read(config_file)
     return config["train"]
-    
-    
+
+
 def run():
     """Entry point for console_scripts"""
     main(sys.argv[1:])

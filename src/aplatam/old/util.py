@@ -28,6 +28,7 @@ def open_sentinel2_bands(scene_path, band_ids):
     JPG2000 files to GeoTIFF. This allows Rasterio to read/write with windows.
 
     """
+
     def band_file(scene_path, band, ext):
         pattern = os.path.join(scene_path, '*_B{}.{}'.format(b, ext))
         files = glob.glob(pattern)
@@ -48,7 +49,7 @@ def open_sentinel2_bands(scene_path, band_ids):
 
                 # Run gdal_translate to convert JPG2000 to GeoTIFF
                 cmd = 'gdal_translate -q -of GTiff "{src}" "{dst}"'.format(
-                        src=jp2_file, dst=tif_file)
+                    src=jp2_file, dst=tif_file)
                 print('Converting {} to GeoTIFF...'.format(jp2_file))
                 subprocess.run(cmd, shell=True)
                 print('{} written'.format(tif_file))
@@ -97,9 +98,7 @@ def reproject_vector_layer(path, t_srs):
 
     with tempfile.TemporaryDirectory(prefix=prefix) as tmpdirname:
         cmd = 'ogr2ogr -t_srs "{t_srs}" "{dst}" "{src}"'.format(
-                t_srs=t_srs,
-                src=path,
-                dst=tmpdirname)
+            t_srs=t_srs, src=path, dst=tmpdirname)
         subprocess.run(cmd, shell=True)
         pattern = os.path.join(tmpdirname, '*.shp')
         files = glob.glob(pattern)
@@ -108,9 +107,10 @@ def reproject_vector_layer(path, t_srs):
 
 def reproject_shape(shape, src_epsg, dst_epsg):
     """Reprojects a shape from some projection to another"""
-    project = partial(pyproj.transform,
-            pyproj.Proj(init=src_epsg),
-            pyproj.Proj(init=dst_epsg))
+    project = partial(
+        pyproj.transform,
+        pyproj.Proj(init=src_epsg),
+        pyproj.Proj(init=dst_epsg))
     return transform(project, shape)
 
 
@@ -129,4 +129,5 @@ def sliding_windows(size, step_size, raster_size):
         for j in range(0, w, step_size):
             diff_i = (i + size - h) if i + size > h else 0
             diff_j = (j + size - w) if j + size > w else 0
-            yield (i - diff_i, i + size - diff_i), (j - diff_j, j + size - diff_j)
+            yield (i - diff_i, i + size - diff_i), (j - diff_j,
+                                                    j + size - diff_j)

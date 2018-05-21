@@ -41,8 +41,8 @@ def fib(n):
     """
     assert n > 0
     a, b = 1, 1
-    for i in range(n-1):
-        a, b = b, a+b
+    for i in range(n - 1):
+        a, b = b, a + b
     return a
 
 
@@ -62,10 +62,7 @@ def parse_args(args):
         action='version',
         version='aplatam {ver}'.format(ver=__version__))
     parser.add_argument(
-        dest="n",
-        help="n-th Fibonacci number",
-        type=int,
-        metavar="INT")
+        dest="n", help="n-th Fibonacci number", type=int, metavar="INT")
     parser.add_argument(
         '-v',
         '--verbose',
@@ -90,8 +87,11 @@ def setup_logging(loglevel):
       loglevel (int): minimum loglevel for emitting messages
     """
     logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
-    logging.basicConfig(level=loglevel, stream=sys.stdout,
-                        format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
+    logging.basicConfig(
+        level=loglevel,
+        stream=sys.stdout,
+        format=logformat,
+        datefmt="%Y-%m-%d %H:%M:%S")
 
 
 def main(args):
