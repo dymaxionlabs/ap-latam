@@ -15,6 +15,9 @@ import fiona
 from aplatam import __version__
 from aplatam.util import all_raster_files
 import configparser
+from aplatam.util import get_raster_crs
+from aplatam.build_trainset import  build_trainset
+import tempfile
 
 
 __author__ = "Dymaxion Labs"
@@ -64,6 +67,12 @@ def parse_args(args):
         help='seed number for the random number generator')
 
     parser.add_argument(
+        "--temp-dir",
+        default=tempfile.gettempdir(),
+        help='path to temporary files'
+    )
+
+    parser.add_argument(
         '-v',
         '--verbose',
         dest="loglevel",
@@ -111,7 +120,7 @@ def main(args):
     validate_vector_crs(rasters, args.vector)
     validate_rasters_band_count(rasters)
     read_config_file(args.config_file)
-
+    build_trainset(rasters, args.vector,args.config_file, args.temp_dir)
     _logger.info('Done')
 
 
@@ -133,12 +142,6 @@ def validate_vector_crs(rasters, vector):
     if vect_crs != raster_crs:
         raise RuntimeError('CRS mismatch between vector file and rasters')
     return True
-
-
-def get_raster_crs(raster_path):
-    """Return CRS of +raster_path+"""
-    with rasterio.open(raster_path) as dataset:
-        return dataset.crs
 
 
 def get_vector_crs(vector_path):
