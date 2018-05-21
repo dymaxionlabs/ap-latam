@@ -1,9 +1,0 @@
-# Numpy needs to be installed before Rasterio
-numpy
-
-# Test requirements
-tox
-pytest
-pytest-cov
-pytest-mock
-mock
