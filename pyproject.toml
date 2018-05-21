@@ -34,5 +34,5 @@ pylint = "^1.9"
 yapf = "^0.22.0"
 
 [tool.poetry.scripts]
-ap_train = 'aplatam:train.run'
-ap_detect = 'aplatam:detect.run'
+ap_train = 'aplatam.train:run'
+ap_detect = 'aplatam.detect:run'
