@@ -59,23 +59,9 @@ def train(trainable_layers):
         metrics=['accuracy'])
 
     # Initiate the train and test generators with data Augumentation
-    train_datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        horizontal_flip=True,
-        fill_mode="wrap",
-        zoom_range=0.3,
-        width_shift_range=0.1,
-        height_shift_range=0.1,
-        rotation_range=30)
+    train_datagen = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True)
 
-    test_datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        horizontal_flip=True,
-        fill_mode="nearest",
-        zoom_range=0.3,
-        width_shift_range=0.3,
-        height_shift_range=0.3,
-        rotation_range=30)
+    test_datagen = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True)
 
     train_generator = train_datagen.flow_from_directory(
         train_data_dir,
