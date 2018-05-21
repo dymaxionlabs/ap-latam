@@ -28,6 +28,8 @@ pytest = "^3.5"
 pytest-cov = "^2.5"
 mock = "^2.0"
 pytest-mock = "^1.10"
+pylint = "^1.9"
+yapf = "^0.22.0"
 
 [tool.poetry.scripts]
 ap_train = 'ap_latam:train.run'
