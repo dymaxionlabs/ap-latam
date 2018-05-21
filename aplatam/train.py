@@ -5,19 +5,20 @@ Train a detection model from a set of preprocessed rasters and a vector file of
 polygons.
 
 """
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
 import argparse
-import sys
-import logging
-import rasterio
-import fiona
-from aplatam import __version__
-from aplatam.util import all_raster_files
 import configparser
-from aplatam.util import get_raster_crs
-from aplatam.build_trainset import build_trainset
+import logging
+import sys
 import tempfile
+
+import fiona
+import rasterio
+
+from aplatam import __version__
+from aplatam.build_trainset import build_trainset
+from aplatam.util import all_raster_files, get_raster_crs
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__

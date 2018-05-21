@@ -1,12 +1,14 @@
-import fiona
-import rasterio
 import os
+
+import fiona
 import numpy as np
-from shapely.geometry import shape, box
-from aplatam.util import reproject_shape, create_index, sliding_windows, window_to_bounds
-from aplatam.util import get_raster_crs
+import rasterio
+from shapely.geometry import box, shape
 from skimage import exposure
 from skimage.io import imsave
+
+from aplatam.util import (create_index, get_raster_crs, reproject_shape,
+                          sliding_windows, window_to_bounds)
 
 
 def read_shapes(vector):
@@ -69,7 +71,7 @@ def write_window_tiles(shapes,
                 else:
                     img_class = 'f'
 
-            # Prepare img filename
+                # Prepare img filename
                 fname, _ = os.path.splitext(os.path.basename(tile_fname))
                 win_fname = '{}__{}_{}.jpg'.format(fname, window[0][0],
                                                    window[1][0])
@@ -86,11 +88,12 @@ def write_window_tiles(shapes,
                     low, high = np.percentile(rgb, intensity_percentiles)
                     rgb = exposure.rescale_intensity(rgb, in_range=(low, high))
 
-            # Save .jpg image from raster
+                # Save .jpg image from raster
                 img_path = os.path.join(img_dir, win_fname)
                 imsave(img_path, rgb)
             except:
                 pass
+
     # FIXME
     #fname, ext = os.path.splitext(os.path.basename(tile_fname))
     #write_geojson(temp_windows, '/tmp/window_{}.geojson'.format(fname))

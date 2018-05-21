@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from glob import glob
 import os
-import pdb
-import rtree
-import pyproj
 from functools import partial
-from shapely.ops import transform
+from glob import glob
+
+import pyproj
 import rasterio
+import rtree
+from shapely.ops import transform
 
 
 def all_raster_files(dirname, ext='.tif'):
