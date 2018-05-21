@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "ap-latam"
+version = "0.1.0"
+description = ""
+license = "BSD-2-Clause"
+readme = "README.md"
+homepage = "https://github.com/dymaxionlabs/ap-latam"
+repository = "https://github.com/dymaxionlabs/ap-latam"
+authors = [
+    "Damián Silvani <damian@dymaxionlabs.com>",
+    "Federico Baylé <federico@dymaxionlabs.com>",
+]
+
+[tool.poetry.dependencies]
+python = "^3"
+rtree = "^0.8.3"
+shapely = "1.6.4.post1"
+scikit-image = "^0.13.1"
+numpy = "^1.14"
+pyproj = "1.9.5.1"
+tqdm = "^4.23"
+keras = "^2.1"
+fiona = "1.7.11.post2"
+rasterio = {version = "*", allows-prereleases = true}
+
+[tool.poetry.scripts]
+ap_train = 'ap_latam:train.run'
+ap_detect = 'ap_latam:detect.run'
