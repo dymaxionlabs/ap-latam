@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "ap-latam"
+name = "aplatam"
 version = "0.1.0"
 description = ""
 license = "BSD-2-Clause"
@@ -32,5 +32,5 @@ pylint = "^1.9"
 yapf = "^0.22.0"
 
 [tool.poetry.scripts]
-ap_train = 'ap_latam:train.run'
-ap_detect = 'ap_latam:detect.run'
+ap_train = 'aplatam:train.run'
+ap_detect = 'aplatam:detect.run'
