@@ -23,6 +23,12 @@ keras = "^2.1"
 fiona = "1.7.11.post2"
 rasterio = {version = "*", allows-prereleases = true}
 
+[tool.poetry.dev-dependencies]
+pytest = "^3.5"
+pytest-cov = "^2.5"
+mock = "^2.0"
+pytest-mock = "^1.10"
+
 [tool.poetry.scripts]
 ap_train = 'ap_latam:train.run'
 ap_detect = 'ap_latam:detect.run'
