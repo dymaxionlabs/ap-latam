@@ -43,12 +43,12 @@ def window_to_bounds(window, affine):
     return minx, miny, maxx, maxy
 
 
-def reproject_shape(shape, src_epsg, dst_epsg):
+def reproject_shape(shape, src_crs, dst_crs):
     """Reprojects a shape from some projection to another"""
     project = partial(
         pyproj.transform,
-        pyproj.Proj(init=src_epsg),
-        pyproj.Proj(init=dst_epsg))
+        pyproj.Proj(init=src_crs['init']),
+        pyproj.Proj(init=dst_crs['init']))
     return transform(project, shape)
 
 

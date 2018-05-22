@@ -35,11 +35,11 @@ def build_trainset(rasters, vector, config, *, temp_dir):
     size, step_size = int(config['size']), int(config['step_size'])
 
     for raster in rasters:
-        shapes, src = read_shapes(vector)
+        shapes, vector_crs = read_shapes(vector)
         raster_crs = get_raster_crs(raster)
-        shapes = reproject_shapes(shapes, src, raster_crs)
+        shapes = reproject_shapes(shapes, vector_crs, raster_crs)
 
-        if config["buffer_size"] != 0:
+        if buffer_size != 0:
             apply_buffer(buffer_size, shapes)
 
         write_window_tiles(
@@ -54,8 +54,7 @@ def build_trainset(rasters, vector, config, *, temp_dir):
 def read_shapes(vector):
     """Read features from a vector file and return their geometry shapes"""
     with fiona.open(vector) as data:
-        src = data.crs
-    return [(shape(feature["geometry"])) for feature in data], src
+        return [(shape(feat['geometry'])) for feat in data], data.crs
 
 
 def reproject_shapes(shapes, src_crs, dst_crs):
