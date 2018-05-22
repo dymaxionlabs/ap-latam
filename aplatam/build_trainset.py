@@ -1,5 +1,4 @@
 import os
-
 import fiona
 import numpy as np
 import rasterio
@@ -81,45 +80,75 @@ def write_window_tiles(shapes,
 
     path = os.path.join(output_dir, 'all')
     #temp_windows = []
+
     with rasterio.open(tile_fname) as src:
         for window in sliding_windows(size, step_size, src.shape):
-            # Build shape from window bounds
-            #bounds = rio.transform.xy(src.transform, window[0], window[1], offset='ul')
-            #window_box = box(bounds[0][0], bounds[1][0], bounds[0][1], bounds[1][1])
             window_box = box(*window_to_bounds(window, src.transform))
-
             # Get shapes whose bounding boxes intersect with window box
-            matching_shapes = [
-                shapes[s_id] for s_id in index.intersection(window_box.bounds)
-            ]
+            matching_shapes = intersect_window(shapes, index, window_box)
             try:
-                if matching_shapes and any(
-                        s.intersection(window_box).area > 0.0
-                        for s in matching_shapes):
-                    img_class = 't'
-                #temp_windows.append(window_box)
-                else:
-                    img_class = 'f'
-
+                # create image claas
+                img_class = class_imagen(matching_shapes, window_box)
                 # Prepare img filename
-                fname, _ = os.path.splitext(os.path.basename(tile_fname))
-                win_fname = '{}__{}_{}.jpg'.format(fname, window[0][0],
-                                                   window[1][0])
-
+                win_fname = image_filename(tile_fname, window)
                 # Create class directory
-                img_dir = os.path.join(path, img_class)
-                os.makedirs(img_dir, exist_ok=True)
-
+                img_dir = create_class_dir(path, img_class)
                 # Extract image from raster and preprocess
-                rgb = np.dstack(
-                    [src.read(b, window=window) for b in range(1, 4)])
-
-                if rescale_intensity:
-                    low, high = np.percentile(rgb, intensity_percentiles)
-                    rgb = exposure.rescale_intensity(rgb, in_range=(low, high))
-
+                rgb = extract_img(src, window, rescale_intensity,
+                                  intensity_percentiles)
                 # Save .jpg image from raster
-                img_path = os.path.join(img_dir, win_fname)
-                imsave(img_path, rgb)
+                save_jpg(img_dir, win_fname, rgb)
             except RuntimeError:
                 pass
+
+
+def save_jpg(img_dir, win_fname, rgb):
+    """Save .jpg image from raster"""
+    img_path = os.path.join(img_dir, win_fname)
+    imsave(img_path, rgb)
+
+
+def image_filename(tile_fname, window):
+    """Prepare img filename"""
+    fname, _ = os.path.splitext(os.path.basename(tile_fname))
+    win_fname = '{}__{}_{}.jpg'.format(fname, window[0][0], window[1][0])
+    return win_fname
+
+
+def extract_img(src, window, rescale_intensity, intensity_percentiles):
+    """Extract image from raster and preprocess"""
+    rgb = np.dstack([src.read(b, window=window) for b in range(1, 4)])
+    if rescale_intensity:
+        low, high = np.percentile(rgb, intensity_percentiles)
+        rgb = exposure.rescale_intensity(rgb, in_range=(low, high))
+    return rgb
+
+
+def create_class_dir(path, img_class):
+    """Create class directory"""
+    img_dir = os.path.join(path, img_class)
+    os.makedirs(img_dir, exist_ok=True)
+    return img_dir
+
+
+def class_imagen(matching_shapes, window_box):
+    """create image claas"""
+    if is_image_positive(matching_shapes, window_box):
+        img_class = 't'
+    else:
+        img_class = 'f'
+    return img_class
+
+
+def is_image_positive(matching_shapes, window_box):
+    """ image positive """
+    return matching_shapes and any(
+        s.intersection(window_box).area > 0.0 for s in matching_shapes)
+
+
+def intersect_window(shapes, index, window_box):
+    """Get shapes whose bounding boxes intersect with window box"""
+    matching_shapes = [
+        shapes[s_id] for s_id in index.intersection(window_box.bounds)
+    ]
+    return matching_shapes
