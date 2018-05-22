@@ -11,30 +11,61 @@ from aplatam.util import (create_index, get_raster_crs, reproject_shape,
                           sliding_windows, window_to_bounds)
 
 
+def build_trainset(rasters, vector, config, *, temp_dir):
+    """
+    Build a training set of image tiles from a collection of +rasters+
+    for a binary classifier.
+
+    If a tile intersects with a polygon shape from a feature in +vector+, it
+    is stored in the directory for "true" samples. Otherwise, it is stored in
+    the directory corresponding to "false" samples.
+    Both directories are stored in +temp_dir+.
+
+    +config+ is a configuration dictionary with several options:
+
+    * lower_cut, upper_cut: Lower/upper cut of percentiles for intensity
+      rescaling.
+    * buffer_size: Size of buffer (in rasters projection distance unit)
+    * size: Window size (in pixels)
+    * step_size: Sliding window size (in pixels)
+
+    """
+    intensity_percentiles = int(config['lower_cut']), int(config['upper_cut'])
+    buffer_size = int(config['buffer_size'])
+    size, step_size = int(config['size']), int(config['step_size'])
+
+    for raster in rasters:
+        shapes, src = read_shapes(vector)
+        raster_crs = get_raster_crs(raster)
+        shapes = reproject_shapes(shapes, src, raster_crs)
+
+        if config["buffer_size"] != 0:
+            apply_buffer(buffer_size, shapes)
+
+        write_window_tiles(
+            shapes,
+            temp_dir,
+            raster,
+            size=size,
+            step_size=step_size,
+            intensity_percentiles=intensity_percentiles)
+
+
 def read_shapes(vector):
+    """Read features from a vector file and return their geometry shapes"""
     with fiona.open(vector) as data:
         src = data.crs
-    return [(shape(feature["geometria"])) for feature in data], src
+    return [(shape(feature["geometry"])) for feature in data], src
 
 
-def reproject_shapes(shapes, vector_crs, raster_crs):
-    return [reproject_shape(s, vector_crs, raster_crs) for s in shapes]
+def reproject_shapes(shapes, src_crs, dst_crs):
+    """Reproject shapes from CRS +src_crs+ to +dst_crs+"""
+    return [reproject_shape(s, src_crs, dst_crs) for s in shapes]
 
 
-def aply_buffer(buffer_size, shapes):
-    return [C.buffer(buffer_size) for C in shapes]
-
-
-def build_trainset(rasters, vector, config, temp_dir):
-    intensity_percentiles = config["lower_cut"], config["upper_cut"]
-    for varRaster in rasters:
-        shapes, src = read_shapes(vector)
-        raster_crs = get_raster_crs(varRaster)
-        shapes = reproject_shapes(shapes, src, raster_crs)
-        if config["buffer_size"] != 0:
-            aply_buffer(config["buffer_size"], shapes)
-        write_window_tiles(shapes, temp_dir, varRaster, config["size"],
-                           config["sep_size"], intensity_percentiles)
+def apply_buffer(shapes, buffer_size):
+    """Apply a fixed-sized buffer to all shapes"""
+    return [s.buffer(buffer_size) for s in shapes]
 
 
 def write_window_tiles(shapes,
@@ -91,9 +122,5 @@ def write_window_tiles(shapes,
                 # Save .jpg image from raster
                 img_path = os.path.join(img_dir, win_fname)
                 imsave(img_path, rgb)
-            except:
+            except RuntimeError:
                 pass
-
-    # FIXME
-    #fname, ext = os.path.splitext(os.path.basename(tile_fname))
-    #write_geojson(temp_windows, '/tmp/window_{}.geojson'.format(fname))

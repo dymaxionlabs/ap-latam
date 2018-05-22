@@ -18,8 +18,8 @@ def all_raster_files(dirname, ext='.tif'):
 def create_index(shapes):
     """Create an R-Tree index from a set of shapes"""
     index = rtree.index.Index()
-    for id, shape in enumerate(shapes):
-        index.insert(id, shape.bounds)
+    for obj_id, shape in enumerate(shapes):
+        index.insert(obj_id, shape.bounds)
     return index
 
 

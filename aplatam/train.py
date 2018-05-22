@@ -18,7 +18,7 @@ import rasterio
 
 from aplatam import __version__
 from aplatam.build_trainset import build_trainset
-from aplatam.util import all_raster_files, get_raster_crs
+from aplatam.util import all_raster_files
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -109,35 +109,16 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
 
+    config = read_config_file(args.config_file)
+
     _logger.debug('Collect all rasters')
     rasters = all_raster_files(args.rasters_dir)
 
-    validate_rasters_crs(rasters)
-    validate_vector_crs(rasters, args.vector)
     validate_rasters_band_count(rasters)
-    read_config_file(args.config_file)
-    build_trainset(rasters, args.vector, args.config_file, args.temp_dir)
+
+    build_trainset(rasters, args.vector, config, temp_dir=args.temp_dir)
+
     _logger.info('Done')
-
-
-def validate_rasters_crs(rasters):
-    _logger.debug('Validate rasters CRS')
-    prev_crs = None
-    for raster_path in rasters:
-        current_crs = get_raster_crs(raster_path)
-        if prev_crs is not None and prev_crs != current_crs:
-            raise RuntimeError('CRC mismatch in some raster')
-        prev_crs = current_crs
-    return True
-
-
-def validate_vector_crs(rasters, vector):
-    _logger.debug('Validate vector CRS')
-    raster_crs = get_raster_crs(rasters[0])
-    vect_crs = get_vector_crs(vector)
-    if vect_crs != raster_crs:
-        raise RuntimeError('CRS mismatch between vector file and rasters')
-    return True
 
 
 def get_vector_crs(vector_path):
@@ -147,6 +128,13 @@ def get_vector_crs(vector_path):
 
 
 def validate_rasters_band_count(rasters):
+    """
+    Validates all rasters have a count of 4 bands
+
+    Returns True if they are all valid.
+    Otherwise it raises a RuntimeError.
+
+    """
     _logger.debug('Validate rasters band count')
     for raster_path in rasters:
         count = get_raster_band_count(raster_path)
@@ -163,10 +151,15 @@ def get_raster_band_count(raster_path):
 
 
 def read_config_file(config_file):
+    """
+    Reads a +config_file+, parses it and
+    returns a dictionary of key-value options
+
+    """
     _logger.debug('read config file')
     config = configparser.ConfigParser()
     config.read(config_file)
-    return config["train"]
+    return dict(config['train'])
 
 
 def run():
