@@ -32,6 +32,7 @@ mock = "^2.0"
 pytest-mock = "^1.10"
 pylint = "^1.9"
 yapf = "^0.22.0"
+coverage = "^4.5"
 
 [tool.poetry.scripts]
 ap_train = 'aplatam.train:run'
