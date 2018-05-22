@@ -7,8 +7,8 @@ readme = "README.md"
 homepage = "https://github.com/dymaxionlabs/ap-latam"
 repository = "https://github.com/dymaxionlabs/ap-latam"
 authors = [
-    "Damián Silvani <damian@dymaxionlabs.com>",
     "Federico Baylé <federico@dymaxionlabs.com>",
+    "Damián Silvani <damian@dymaxionlabs.com>",
 ]
 
 [tool.poetry.dependencies]
