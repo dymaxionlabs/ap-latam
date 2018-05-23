@@ -10,7 +10,6 @@ import rasterio
 from shapely.geometry import box, shape
 from skimage import exposure
 from skimage.io import imsave
-
 from aplatam.util import (create_index, get_raster_crs, reproject_shape,
                           sliding_windows, window_to_bounds)
 
@@ -36,9 +35,10 @@ def build_trainset(rasters, vector, config, *, output_dir):
     * step_size: Sliding window size (in pixels)
 
     """
-    intensity_percentiles = int(config['lower_cut']), int(config['upper_cut'])
-    buffer_size = int(config['buffer_size'])
-    size, step_size = int(config['size']), int(config['step_size'])
+    intensity_percentiles = config.getint('lower_cut'), config.getint(
+        'upper_cut')
+    buffer_size = config.getint('buffer_size')
+    size, step_size = config.getint('size'), config.getint('step_size')
 
     for raster in rasters:
         shapes, vector_crs = read_shapes(vector)
