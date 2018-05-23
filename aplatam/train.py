@@ -26,6 +26,9 @@ __license__ = "new-bsd"
 
 _logger = logging.getLogger(__name__)
 
+# Number of bands that all rasters must have
+BAND_COUNT = 4
+
 
 def parse_args(args):
     """
@@ -38,7 +41,9 @@ def parse_args(args):
       :obj:`argparse.Namespace`: command line parameters namespace
 
     """
-    parser = argparse.ArgumentParser(description="...")
+    parser = argparse.ArgumentParser(
+        description=('Train a detection model from a set of '
+                     'preprocessed rasters and a vector file of polygons.'))
     parser.add_argument(
         '--version',
         action='version',
@@ -50,7 +55,7 @@ def parse_args(args):
     parser.add_argument(
         '-c',
         '--config-file',
-        default="default.cfg",
+        default='default.cfg',
         help='configuration file')
     parser.add_argument(
         '-o',
@@ -61,7 +66,7 @@ def parse_args(args):
         '--seed', type=int, help='seed number for the random number generator')
 
     parser.add_argument(
-        "--temp-dir",
+        '--temp-dir',
         default=tempfile.gettempdir(),
         help='path to temporary files')
 
@@ -79,6 +84,7 @@ def parse_args(args):
         help="set loglevel to DEBUG",
         action='store_const',
         const=logging.DEBUG)
+
     return parser.parse_args(args)
 
 
@@ -138,7 +144,7 @@ def validate_rasters_band_count(rasters):
     _logger.debug('Validate rasters band count')
     for raster_path in rasters:
         count = get_raster_band_count(raster_path)
-        if count != 4:
+        if count != BAND_COUNT:
             raise RuntimeError(
                 'Rasters must have exactly 4 bands (was {})'.format(count))
     return True
