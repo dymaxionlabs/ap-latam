@@ -5,6 +5,12 @@ import rasterio
 from shapely.geometry import box, shape
 from skimage import exposure
 from skimage.io import imsave
+import glob
+import random
+import shutil
+import logging
+
+_logger = logging.getLogger(__name__)
 
 from aplatam.util import (create_index, get_raster_crs, reproject_shape,
                           sliding_windows, window_to_bounds)
@@ -32,6 +38,7 @@ def build_trainset(rasters, vector, config, *, temp_dir):
     intensity_percentiles = int(config['lower_cut']), int(config['upper_cut'])
     buffer_size = int(config['buffer_size'])
     size, step_size = int(config['size']), int(config['step_size'])
+    test_size = float(config["test_size"])
 
     for raster in rasters:
         shapes, vector_crs = read_shapes(vector)
@@ -48,6 +55,10 @@ def build_trainset(rasters, vector, config, *, temp_dir):
             size=size,
             step_size=step_size,
             intensity_percentiles=intensity_percentiles)
+
+    true_files = glob.glob(os.path.join(temp_dir, 'all', 't', '*.jpg'))
+    false_files = glob.glob(os.path.join(temp_dir, 'all', 'f', '*.jpg'))
+    split_train_test((true_files, false_files), temp_dir, test_size)
 
 
 def read_shapes(vector):
@@ -152,3 +163,29 @@ def intersect_window(shapes, index, window_box):
         shapes[s_id] for s_id in index.intersection(window_box.bounds)
     ]
     return matching_shapes
+
+
+def move_files(files, dst_dir):
+    os.makedirs(dst_dir, exist_ok=True)
+    for src in files:
+        fname = os.path.basename(src)
+        dst = os.path.join(dst_dir, fname)
+        shutil.copyfile(src, dst)
+
+
+def split_train_test(files, output_dir, validation_size):
+    true_files, false_files = files
+    n_test = round(len(true_files) * validation_size)
+
+    random.shuffle(true_files)
+    random.shuffle(false_files)
+
+    Xt_test, Xt_train = true_files[:n_test], true_files[n_test:]
+    Xf_test, Xf_train = false_files[:n_test], false_files[n_test:]
+    _logger.info('Xt_train %d , Xt_test %d , Xf_train %d, Xf_test %d ',
+                 len(Xt_train), len(Xt_test), len(Xf_train), len(Xf_test))
+
+    move_files(Xt_train, os.path.join(output_dir, 'train', 't'))
+    move_files(Xf_train, os.path.join(output_dir, 'train', 'f'))
+    move_files(Xt_test, os.path.join(output_dir, 'test', 't'))
+    move_files(Xf_test, os.path.join(output_dir, 'test', 'f'))
