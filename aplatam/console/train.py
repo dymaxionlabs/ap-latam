@@ -7,6 +7,7 @@ Train a detection model from an already prepared dataset.
 import argparse
 import logging
 import sys
+import random
 
 from aplatam import __version__
 from aplatam.util import read_config_file
@@ -60,6 +61,22 @@ def parse_args(args):
         help="set loglevel to INFO",
         action='store_const',
         const=logging.INFO)
+
+    parser.add_argument(
+        "--test-size",
+        type=float,
+        default=0.25,
+        help=("The proportion of the dataset to include in the test split. "
+              "Float number between 0.0 and 1.0"))
+
+    parser.add_argument(
+        "--validation-size",
+        type=float,
+        default=0.25,
+        help=(
+            "The proportion of the dataset to include in the validation split. "
+            "Float number between 0.0 and 1.0"))
+
     parser.add_argument(
         '-vv',
         '--very-verbose',
@@ -97,10 +114,13 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
+    if args.seed:
+        _logger.info('Seed: {}'.format(args.seed))
+        random.seed(args.seed)
 
     _config = read_config_file(args.config_file, 'train')
 
-    # TODO ...
+    #TODO ...
 
     _logger.info('Done')
 
