@@ -67,6 +67,12 @@ def parse_args(args):
         action='store_const',
         const=logging.INFO)
 
+    parser.add_argument("trainable_leyers", type=int, default=5, help="")
+
+    parser.add_argument("batch_size", type=int, default=5, help="")
+
+    parser.add_argument("epochs", type=int, default=20, help="")
+
     parser.add_argument(
         "--test-size",
         type=float,
