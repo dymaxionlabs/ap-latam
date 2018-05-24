@@ -179,8 +179,8 @@ def intersect_window(shapes, index, window_box):
     Get shapes whose bounding boxes intersect with window box
 
     Arguments:
-        shapes {list(shapely.Shape)} -- list of shapes
-        index {Index} -- R-Tree index object
+        shapes {list(shape)} -- list of shapes
+        index {index} -- R-Tree index object
         window_box {shape} -- window box shape
 
     Returns:
@@ -198,7 +198,7 @@ def move_files(files, dst_dir):
     Move all files to a destination directory, creating them if needed
 
     Arguments:
-        files {iterable} -- iterable of file paths
+        files {list(string)} -- list of file paths
         dst_dir {string} -- destination directory name
 
     """
@@ -214,7 +214,7 @@ def split_train_test(files, output_dir, test_size, _validation_size):
     Split a list of files into training, validation and test datasets
 
     Arguments:
-        files {iterable} -- iterable of file paths
+        files {list(string)} -- list of file paths
         output_dir {string} -- output directory name
         test_size {float} -- proportion of test set from total of true samples
         validation_size {float} -- proportion of validation set from total of
