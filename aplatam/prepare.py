@@ -1,21 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Train a detection model from an already prepared dataset.
+Prepare a dataset for training and validating a model from a set of
+preprocessed rasters and a vector file of polygons.
 
 """
 import argparse
 import logging
 import sys
 
+import fiona
+import rasterio
+
 from aplatam import __version__
-from aplatam.util import read_config_file
+from aplatam.build_trainset import build_trainset
+from aplatam.util import all_raster_files, read_config_file
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
 __license__ = "new-bsd"
 
 _logger = logging.getLogger(__name__)
+
+# Number of bands that all rasters must have
+BAND_COUNT = 4
 
 
 def parse_args(args):
@@ -30,11 +38,15 @@ def parse_args(args):
 
     """
     parser = argparse.ArgumentParser(
-        description='Train a detection model from an already prepared dataset')
+        description=('Prepare a dataset for training and validating a model '
+                     'from a set of preprocessed rasters and a vector file '
+                     'of polygons.Train a detection model from a set of '
+                     'preprocessed rasters and a vector file of polygons.'))
 
     # Mandatory arguments
     parser.add_argument(
-        'dataset_dir', help='directory containing the prepared dataset')
+        'rasters_dir', help='directory containing raster images')
+    parser.add_argument('vector', help='vector file of polygons')
 
     # Options
     parser.add_argument(
@@ -48,9 +60,9 @@ def parse_args(args):
         help='configuration file')
     parser.add_argument(
         '-o',
-        '--output-model',
-        default='model.h5',
-        help='filename for output model')
+        '--output-directory',
+        default='./dataset',
+        help='path to output dataset directory')
     parser.add_argument(
         '--seed', type=int, help='seed number for the random number generator')
     parser.add_argument(
@@ -98,11 +110,45 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
 
-    _config = read_config_file(args.config_file, 'train')
+    config = read_config_file(args.config_file, 'prepare')
 
-    # TODO ...
+    _logger.debug('Collect all rasters from %s', args.rasters_dir)
+    rasters = all_raster_files(args.rasters_dir)
+
+    validate_rasters_band_count(rasters)
+
+    build_trainset(rasters, args.vector, config, temp_dir=args.temp_dir)
 
     _logger.info('Done')
+
+
+def get_vector_crs(vector_path):
+    """Return CRS of +vector_path+"""
+    with fiona.open(vector_path) as dataset:
+        return dataset.crs
+
+
+def validate_rasters_band_count(rasters):
+    """
+    Validates all rasters have a count of 4 bands
+
+    Returns True if they are all valid.
+    Otherwise it raises a RuntimeError.
+
+    """
+    _logger.debug('Validate rasters band count')
+    for raster_path in rasters:
+        count = get_raster_band_count(raster_path)
+        if count != BAND_COUNT:
+            raise RuntimeError(
+                'Rasters must have exactly 4 bands (was {})'.format(count))
+    return True
+
+
+def get_raster_band_count(raster_path):
+    """Return band count of +raster_path+"""
+    with rasterio.open(raster_path) as dataset:
+        return dataset.count
 
 
 def run():

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import configparser
+import logging
 import os
 from functools import partial
 from glob import glob
@@ -7,6 +9,8 @@ import pyproj
 import rasterio
 import rtree
 from shapely.ops import transform
+
+_logger = logging.getLogger(__name__)
 
 
 def all_raster_files(dirname, ext='.tif'):
@@ -56,3 +60,15 @@ def get_raster_crs(raster_path):
     """Return CRS of +raster_path+"""
     with rasterio.open(raster_path) as dataset:
         return dataset.crs
+
+
+def read_config_file(config_file, section):
+    """
+    Reads a +config_file+, parses it and
+    returns a dictionary of key-value options
+
+    """
+    _logger.debug('read config file')
+    config = configparser.ConfigParser()
+    config.read(config_file)
+    return config[section]
