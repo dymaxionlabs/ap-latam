@@ -1,24 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Train a detection model from a set of preprocessed rasters and a vector file of
-polygons.
+Prepare a dataset for training a model from a set of preprocessed rasters and a
+vector file of polygons.
 
 """
-from __future__ import absolute_import, division, print_function
-
 import argparse
-import configparser
 import logging
 import sys
-import tempfile
 
 import fiona
 import rasterio
 
 from aplatam import __version__
 from aplatam.build_trainset import build_trainset
-from aplatam.util import all_raster_files
+from aplatam.util import all_raster_files, read_config_file, write_metadata
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -42,34 +38,27 @@ def parse_args(args):
 
     """
     parser = argparse.ArgumentParser(
-        description=('Train a detection model from a set of '
+        description=('Prepare a dataset for training a model from a set of '
                      'preprocessed rasters and a vector file of polygons.'))
+
+    # Mandatory arguments
+    parser.add_argument(
+        'rasters_dir', help='directory containing raster images')
+    parser.add_argument('vector', help='vector file of polygons')
+    parser.add_argument(
+        'output_dir',
+        help='path to output dataset directory')
+
+    # Options
     parser.add_argument(
         '--version',
         action='version',
         version='aplatam {ver}'.format(ver=__version__))
-
-    parser.add_argument(
-        'rasters_dir', help='directory containing raster images')
-    parser.add_argument('vector', help='vector file of polygons')
     parser.add_argument(
         '-c',
         '--config-file',
         default='default.cfg',
         help='configuration file')
-    parser.add_argument(
-        '-o',
-        '--output-model',
-        default='model.h5',
-        help='filename for output model')
-    parser.add_argument(
-        '--seed', type=int, help='seed number for the random number generator')
-
-    parser.add_argument(
-        '--temp-dir',
-        default=tempfile.gettempdir(),
-        help='path to temporary files')
-
     parser.add_argument(
         '-v',
         '--verbose',
@@ -115,14 +104,16 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
 
-    config = read_config_file(args.config_file)
+    config = read_config_file(args.config_file, 'prepare')
 
-    _logger.debug('Collect all rasters')
+    _logger.debug('Collect all rasters from %s', args.rasters_dir)
     rasters = all_raster_files(args.rasters_dir)
 
     validate_rasters_band_count(rasters)
 
-    build_trainset(rasters, args.vector, config, temp_dir=args.temp_dir)
+    build_trainset(rasters, args.vector, config, output_dir=args.output_dir)
+
+    write_metadata(args.output_dir, version=__version__, **config)
 
     _logger.info('Done')
 
@@ -154,18 +145,6 @@ def get_raster_band_count(raster_path):
     """Return band count of +raster_path+"""
     with rasterio.open(raster_path) as dataset:
         return dataset.count
-
-
-def read_config_file(config_file):
-    """
-    Reads a +config_file+, parses it and
-    returns a dictionary of key-value options
-
-    """
-    _logger.debug('read config file')
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    return dict(config['train'])
 
 
 def run():

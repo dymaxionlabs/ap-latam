@@ -1,27 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-This is a skeleton file that can serve as a starting point for a Python
-console script. To run this script uncomment the following line in the
-entry_points section in setup.cfg:
+Train a detection model from an already prepared dataset.
 
-    console_scripts =
-     fibonacci = aplatam.skeleton:run
-
-Then run `python setup.py install` which will install the command `fibonacci`
-inside your current environment.
-Besides console scripts, the header (i.e. until _logger...) of this file can
-also be used as template for Python modules.
-
-Note: This skeleton file can be safely removed if not needed!
 """
-from __future__ import division, print_function, absolute_import
-
 import argparse
-import sys
 import logging
+import sys
 
 from aplatam import __version__
+from aplatam.util import read_config_file
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -30,39 +18,41 @@ __license__ = "new-bsd"
 _logger = logging.getLogger(__name__)
 
 
-def fib(n):
-    """Fibonacci example function
-
-    Args:
-      n (int): integer
-
-    Returns:
-      int: n-th Fibonacci number
-    """
-    assert n > 0
-    a, b = 1, 1
-    for i in range(n - 1):
-        a, b = b, a + b
-    return a
-
-
 def parse_args(args):
-    """Parse command line parameters
+    """
+    Parse command line parameters
 
     Args:
       args ([str]): command line parameters as list of strings
 
     Returns:
       :obj:`argparse.Namespace`: command line parameters namespace
+
     """
     parser = argparse.ArgumentParser(
-        description="Just a Fibonnaci demonstration")
+        description='Train a detection model from an already prepared dataset')
+
+    # Mandatory arguments
+    parser.add_argument(
+        'dataset_dir', help='directory containing the prepared dataset')
+
+    # Options
     parser.add_argument(
         '--version',
         action='version',
         version='aplatam {ver}'.format(ver=__version__))
     parser.add_argument(
-        dest="n", help="n-th Fibonacci number", type=int, metavar="INT")
+        '-c',
+        '--config-file',
+        default='default.cfg',
+        help='configuration file')
+    parser.add_argument(
+        '-o',
+        '--output-model',
+        default='model.h5',
+        help='filename for output model')
+    parser.add_argument(
+        '--seed', type=int, help='seed number for the random number generator')
     parser.add_argument(
         '-v',
         '--verbose',
@@ -77,14 +67,17 @@ def parse_args(args):
         help="set loglevel to DEBUG",
         action='store_const',
         const=logging.DEBUG)
+
     return parser.parse_args(args)
 
 
 def setup_logging(loglevel):
-    """Setup basic logging
+    """
+    Setup basic logging
 
     Args:
       loglevel (int): minimum loglevel for emitting messages
+
     """
     logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
     logging.basicConfig(
@@ -95,21 +88,25 @@ def setup_logging(loglevel):
 
 
 def main(args):
-    """Main entry point allowing external calls
+    """
+    Main entry point allowing external calls
 
     Args:
       args ([str]): command line parameter list
+
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
-    print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
-    _logger.info("Script ends here")
+
+    _config = read_config_file(args.config_file, 'train')
+
+    # TODO ...
+
+    _logger.info('Done')
 
 
 def run():
-    """Entry point for console_scripts
-    """
+    """Entry point for console_scripts"""
     main(sys.argv[1:])
 
 
