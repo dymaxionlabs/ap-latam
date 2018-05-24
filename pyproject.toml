@@ -35,6 +35,6 @@ yapf = "^0.22.0"
 coverage = "^4.5"
 
 [tool.poetry.scripts]
-ap_prepare = 'aplatam.prepare:run'
-ap_train = 'aplatam.train:run'
-ap_detect = 'aplatam.detect:run'
+ap_prepare = 'aplatam.console.prepare:run'
+ap_train = 'aplatam.console.train:run'
+ap_detect = 'aplatam.console.detect:run'
