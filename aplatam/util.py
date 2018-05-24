@@ -5,6 +5,7 @@ import os
 from functools import partial
 from glob import glob
 
+import json
 import pyproj
 import rasterio
 import rtree
@@ -72,3 +73,9 @@ def read_config_file(config_file, section):
     config = configparser.ConfigParser()
     config.read(config_file)
     return config[section]
+
+
+def write_metadata(output_dir, **kwargs):
+    os.makedirs(output_dir, exist_ok=True)
+    with open(os.path.join(output_dir, 'metadata.json'), 'w') as f:
+        json.dump(kwargs, f)

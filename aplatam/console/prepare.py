@@ -14,7 +14,7 @@ import rasterio
 
 from aplatam import __version__
 from aplatam.build_trainset import build_trainset
-from aplatam.util import all_raster_files, read_config_file
+from aplatam.util import all_raster_files, read_config_file, write_metadata
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -112,6 +112,8 @@ def main(args):
     validate_rasters_band_count(rasters)
 
     build_trainset(rasters, args.vector, config, output_dir=args.output_dir)
+
+    write_metadata(args.output_dir, version=__version__, **config)
 
     _logger.info('Done')
 

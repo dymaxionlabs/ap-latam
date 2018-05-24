@@ -56,9 +56,6 @@ def build_trainset(rasters, vector, config, *, output_dir):
             step_size=step_size,
             intensity_percentiles=intensity_percentiles)
 
-    # TODO Write metadata.json file with the following keys:
-    # version, size, step_size, rescale_intensity, lower_cut, upper_cut
-
 
 def read_shapes(vector):
     """Read features from a vector file and return their geometry shapes"""
