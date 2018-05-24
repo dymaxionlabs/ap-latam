@@ -93,24 +93,17 @@ def write_window_tiles(shapes,
     index = create_index(shapes)
 
     path = os.path.join(output_dir, 'all')
-    #temp_windows = []
 
     with rasterio.open(tile_fname) as src:
         for window in sliding_windows(size, step_size, src.shape):
             window_box = box(*window_to_bounds(window, src.transform))
-            # Get shapes whose bounding boxes intersect with window box
             matching_shapes = intersect_window(shapes, index, window_box)
             try:
-                # create image claas
-                img_class = class_imagen(matching_shapes, window_box)
-                # Prepare img filename
-                win_fname = image_filename(tile_fname, window)
-                # Create class directory
+                img_class = image_class_string(matching_shapes, window_box)
+                win_fname = prepare_img_filename(tile_fname, window)
                 img_dir = create_class_dir(path, img_class)
-                # Extract image from raster and preprocess
                 rgb = extract_img(src, window, rescale_intensity,
                                   intensity_percentiles)
-                # Save .jpg image from raster
                 save_jpg(img_dir, win_fname, rgb)
             except RuntimeError:
                 pass
@@ -122,7 +115,7 @@ def save_jpg(img_dir, win_fname, rgb):
     imsave(img_path, rgb)
 
 
-def image_filename(tile_fname, window):
+def prepare_img_filename(tile_fname, window):
     """Prepare img filename"""
     fname, _ = os.path.splitext(os.path.basename(tile_fname))
     win_fname = '{}__{}_{}.jpg'.format(fname, window[0][0], window[1][0])
@@ -145,7 +138,7 @@ def create_class_dir(path, img_class):
     return img_dir
 
 
-def class_imagen(matching_shapes, window_box):
+def image_class_string(matching_shapes, window_box):
     """
     Return image class string
 
