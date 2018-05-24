@@ -8,9 +8,12 @@ import argparse
 import logging
 import sys
 import random
+import os
+import glob
 
 from aplatam import __version__
 from aplatam.util import read_config_file
+from aplatam.class_balancing import split_dataset
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -52,6 +55,7 @@ def parse_args(args):
         '--output-model',
         default='model.h5',
         help='filename for output model')
+    parser.add_argument('--temp-dir', help='path to temporary directory')
     parser.add_argument(
         '--seed', type=int, help='seed number for the random number generator')
     parser.add_argument(
@@ -118,9 +122,17 @@ def main(args):
         _logger.info('Seed: {}'.format(args.seed))
         random.seed(args.seed)
 
-    _config = read_config_file(args.config_file, 'train')
+    config = read_config_file(args.config_file, 'train')
 
-    #TODO ...
+    test_size = config.getfloat('test_size')
+    validation_size = config.getfloat('validation_size')
+    aug = config.getfloat('aug')
+
+    true_files = glob.glob(os.path.join(args.dataset_dir, 't', '*.jpg'))
+    false_files = glob.glob(os.path.join(args.dataset_dir, 'f', '*.jpg'))
+
+    split_dataset((true_files, false_files), args.temp_dir, test_size,
+                  validation_size, aug)
 
     _logger.info('Done')
 

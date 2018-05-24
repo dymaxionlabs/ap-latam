@@ -1,15 +1,15 @@
-def main():
-    test_size = float(config["test_size"])
-    validation_size = float(config["validation_size"])
+import os
+import random
+import shutil
 
-    true_files = glob.glob(os.path.join(output_dir, 't', '*.jpg'))
-    false_files = glob.glob(os.path.join(output_dir, 'f', '*.jpg'))
-
-    split_train_test((true_files, false_files), output_dir, test_size,
-            validation_size)
+_logger = logging.getLogger(__name__)
 
 
-def split_train_test(files, output_dir, test_size, _validation_size):
+def split_dataset(files,
+                  output_dir,
+                  test_size=0.25,
+                  validation_size=0.25,
+                  aug=1):
     """
     Split a list of files into training, validation and test datasets
 
@@ -19,12 +19,14 @@ def split_train_test(files, output_dir, test_size, _validation_size):
         test_size {float} -- proportion of test set from total of true samples
         validation_size {float} -- proportion of validation set from total of
             true samples.
+        aug {float} -- proportion of false samples w.r.t true samples (e.g.
+            1.0 = 50% true 50% false)
 
     """
     true_files, false_files = files
     n_total = len(true_files)
     n_test = round(n_total * test_size)
-    #n_validation = round(n_total * validation_size)
+    n_validation = round(n_total * validation_size)
 
     random.shuffle(true_files)
     random.shuffle(false_files)
@@ -54,4 +56,3 @@ def move_files(files, dst_dir):
         fname = os.path.basename(src)
         dst = os.path.join(dst_dir, fname)
         shutil.copyfile(src, dst)
-
