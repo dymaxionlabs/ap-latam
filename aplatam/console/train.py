@@ -5,15 +5,16 @@ Train a detection model from an already prepared dataset.
 
 """
 import argparse
-import logging
-import sys
-import random
-import os
 import glob
+import logging
+import os
+import random
+import sys
+import tempfile
 
 from aplatam import __version__
-from aplatam.util import read_config_file
 from aplatam.class_balancing import split_dataset
+from aplatam.util import read_config_file
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -128,10 +129,18 @@ def main(args):
     validation_size = config.getfloat('validation_size')
     aug = config.getfloat('aug')
 
+    # Gather all files in dataset
     true_files = glob.glob(os.path.join(args.dataset_dir, 't', '*.jpg'))
     false_files = glob.glob(os.path.join(args.dataset_dir, 'f', '*.jpg'))
 
-    split_dataset((true_files, false_files), args.temp_dir, test_size,
+    # Create temporary directory, if not supplied as argument
+    if args.temp_dir:
+        tempdir = args.temp_dir
+    else:
+        tempdir = tempfile.mkdtemp(prefix=__name__)
+        _logger.info('temporary directory %s created', tempdir)
+
+    split_dataset((true_files, false_files), tempdir, test_size,
                   validation_size, aug)
 
     _logger.info('Done')
