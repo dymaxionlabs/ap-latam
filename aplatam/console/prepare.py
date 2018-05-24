@@ -40,8 +40,7 @@ def parse_args(args):
     parser = argparse.ArgumentParser(
         description=('Prepare a dataset for training and validating a model '
                      'from a set of preprocessed rasters and a vector file '
-                     'of polygons.Train a detection model from a set of '
-                     'preprocessed rasters and a vector file of polygons.'))
+                     'of polygons.'))
 
     # Mandatory arguments
     parser.add_argument(
