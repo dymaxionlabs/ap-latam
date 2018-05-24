@@ -8,10 +8,10 @@ vector file of polygons.
 import argparse
 import logging
 import sys
+import random
 
 import fiona
 import rasterio
-
 from aplatam import __version__
 from aplatam.build_trainset import build_trainset
 from aplatam.util import all_raster_files, read_config_file, write_metadata
@@ -103,6 +103,9 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
+    if args.seed:
+        _logger.info('Seed: {}'.format(args.seed))
+        random.seed(args.seed)
 
     config = read_config_file(args.config_file, 'prepare')
 
