@@ -8,7 +8,6 @@ vector file of polygons.
 import argparse
 import logging
 import sys
-import random
 
 import fiona
 import rasterio
@@ -38,16 +37,14 @@ def parse_args(args):
 
     """
     parser = argparse.ArgumentParser(
-        description=('Prepare a dataset for training a model from a set of '
+        description=('Prepare a dataset for training a model from a set of. '
                      'preprocessed rasters and a vector file of polygons.'))
 
     # Mandatory arguments
     parser.add_argument(
         'rasters_dir', help='directory containing raster images')
     parser.add_argument('vector', help='vector file of polygons')
-    parser.add_argument(
-        'output_dir',
-        help='path to output dataset directory')
+    parser.add_argument('output_dir', help='path to output dataset directory')
 
     # Options
     parser.add_argument(
@@ -59,6 +56,36 @@ def parse_args(args):
         '--config-file',
         default='default.cfg',
         help='configuration file')
+
+    parser.add_argument("--size", type=int, default=128, help="window size")
+
+    parser.add_argument(
+        "--step-size",
+        type=int,
+        default=64,
+        help="step size for sliding window")
+
+    parser.add_argument(
+        "--buffer-size",
+        type=int,
+        default=0,
+        help=
+        "If buffer_size > 0, polygons are expanded with a fixed-sized buffer")
+
+    parser.add_argument(
+        "--lower-cut",
+        type=int,
+        default=2,
+        help=
+        "Lower cut of percentiles for cumulative count in intensity rescaling")
+
+    parser.add_argument(
+        "--upper-cut",
+        type=int,
+        default=98,
+        help=
+        "upper cut of percentiles for cumulative count in intensity rescaling")
+
     parser.add_argument(
         '-v',
         '--verbose',
@@ -103,9 +130,6 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    if args.seed:
-        _logger.info('Seed: {}'.format(args.seed))
-        random.seed(args.seed)
 
     config = read_config_file(args.config_file, 'prepare')
 
