@@ -17,7 +17,7 @@ from aplatam.util import (create_index, get_raster_crs, reproject_shape,
 _logger = logging.getLogger(__name__)
 
 
-def build_trainset(rasters, vector, config, *, temp_dir):
+def build_trainset(rasters, vector, config, *, output_dir):
     """
     Build a training set of image tiles from a collection of +rasters+
     for a binary classifier.
@@ -25,7 +25,7 @@ def build_trainset(rasters, vector, config, *, temp_dir):
     If a tile intersects with a polygon shape from a feature in +vector+, it
     is stored in the directory for "true" samples. Otherwise, it is stored in
     the directory corresponding to "false" samples.
-    Both directories are stored in +temp_dir+.
+    Both directories are stored in +output_dir+.
 
     +config+ is a configuration dictionary with several options:
 
@@ -52,15 +52,16 @@ def build_trainset(rasters, vector, config, *, temp_dir):
 
         write_window_tiles(
             shapes,
-            temp_dir,
+            output_dir,
             raster,
             size=size,
             step_size=step_size,
             intensity_percentiles=intensity_percentiles)
 
-    true_files = glob.glob(os.path.join(temp_dir, 'all', 't', '*.jpg'))
-    false_files = glob.glob(os.path.join(temp_dir, 'all', 'f', '*.jpg'))
-    split_train_test((true_files, false_files), temp_dir, test_size,
+    true_files = glob.glob(os.path.join(output_dir, 'all', 't', '*.jpg'))
+    false_files = glob.glob(os.path.join(output_dir, 'all', 'f', '*.jpg'))
+
+    split_train_test((true_files, false_files), output_dir, test_size,
                      validation_size)
 
 

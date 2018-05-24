@@ -59,7 +59,7 @@ def parse_args(args):
         help='configuration file')
     parser.add_argument(
         '-o',
-        '--output-directory',
+        '--output-dir',
         default='./dataset',
         help='path to output dataset directory')
     parser.add_argument(
@@ -116,7 +116,7 @@ def main(args):
 
     validate_rasters_band_count(rasters)
 
-    build_trainset(rasters, args.vector, config, temp_dir=args.temp_dir)
+    build_trainset(rasters, args.vector, config, output_dir=args.output_dir)
 
     _logger.info('Done')
 
