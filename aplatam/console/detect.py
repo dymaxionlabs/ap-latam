@@ -5,8 +5,6 @@ Train a detection model from a set of preprocessed rasters and a vector file of
 polygons.
 
 """
-from __future__ import absolute_import, division, print_function
-
 import argparse
 import logging
 import sys
