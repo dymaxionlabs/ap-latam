@@ -85,8 +85,6 @@ def write_window_tiles(shapes,
     # Create R-Tree index with shapes to speed up intersection operation
     index = create_index(shapes)
 
-    path = os.path.join(output_dir, 'all')
-
     with rasterio.open(tile_fname) as src:
         for window in sliding_windows(size, step_size, src.shape):
             window_box = box(*window_to_bounds(window, src.transform))
@@ -94,7 +92,7 @@ def write_window_tiles(shapes,
             try:
                 img_class = image_class_string(matching_shapes, window_box)
                 win_fname = prepare_img_filename(tile_fname, window)
-                img_dir = create_class_dir(path, img_class)
+                img_dir = create_class_dir(output_dir, img_class)
                 rgb = extract_img(src, window, rescale_intensity,
                                   intensity_percentiles)
                 save_jpg(img_dir, win_fname, rgb)
@@ -183,4 +181,3 @@ def intersect_window(shapes, index, window_box):
         shapes[s_id] for s_id in index.intersection(window_box.bounds)
     ]
     return matching_shapes
-
