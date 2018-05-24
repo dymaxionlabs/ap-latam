@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Prepare a dataset for training and validating a model from a set of
-preprocessed rasters and a vector file of polygons.
+Prepare a dataset for training a model from a set of preprocessed rasters and a
+vector file of polygons.
 
 """
 import argparse
@@ -38,14 +38,16 @@ def parse_args(args):
 
     """
     parser = argparse.ArgumentParser(
-        description=('Prepare a dataset for training and validating a model '
-                     'from a set of preprocessed rasters and a vector file '
-                     'of polygons.'))
+        description=('Prepare a dataset for training a model from a set of '
+                     'preprocessed rasters and a vector file of polygons.'))
 
     # Mandatory arguments
     parser.add_argument(
         'rasters_dir', help='directory containing raster images')
     parser.add_argument('vector', help='vector file of polygons')
+    parser.add_argument(
+        'output_dir',
+        help='path to output dataset directory')
 
     # Options
     parser.add_argument(
@@ -57,13 +59,6 @@ def parse_args(args):
         '--config-file',
         default='default.cfg',
         help='configuration file')
-    parser.add_argument(
-        '-o',
-        '--output-dir',
-        default='./dataset',
-        help='path to output dataset directory')
-    parser.add_argument(
-        '--seed', type=int, help='seed number for the random number generator')
     parser.add_argument(
         '-v',
         '--verbose',
