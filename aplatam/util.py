@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import configparser
 import logging
 import os
 from functools import partial
@@ -63,19 +62,8 @@ def get_raster_crs(raster_path):
         return dataset.crs
 
 
-def read_config_file(config_file, section):
-    """
-    Reads a +config_file+, parses it and
-    returns a dictionary of key-value options
-
-    """
-    _logger.debug('read config file')
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    return config[section]
-
-
 def write_metadata(output_dir, **kwargs):
+    """Write a dictionary as JSON to a file"""
     os.makedirs(output_dir, exist_ok=True)
     with open(os.path.join(output_dir, 'metadata.json'), 'w') as f:
         json.dump(kwargs, f)

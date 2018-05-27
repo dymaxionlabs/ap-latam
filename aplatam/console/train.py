@@ -14,7 +14,6 @@ import tempfile
 
 from aplatam import __version__
 from aplatam.class_balancing import split_dataset
-from aplatam.util import read_config_file
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -35,6 +34,7 @@ def parse_args(args):
 
     """
     parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='Train a detection model from an already prepared dataset')
 
     # Mandatory arguments
@@ -42,15 +42,6 @@ def parse_args(args):
         'dataset_dir', help='directory containing the prepared dataset')
 
     # Options
-    parser.add_argument(
-        '--version',
-        action='version',
-        version='aplatam {ver}'.format(ver=__version__))
-    parser.add_argument(
-        '-c',
-        '--config-file',
-        default='default.cfg',
-        help='configuration file')
     parser.add_argument(
         '-o',
         '--output-model',
@@ -60,26 +51,11 @@ def parse_args(args):
     parser.add_argument(
         '--seed', type=int, help='seed number for the random number generator')
     parser.add_argument(
-        '-v',
-        '--verbose',
-        dest="loglevel",
-        help="set loglevel to INFO",
-        action='store_const',
-        const=logging.INFO)
-
-    parser.add_argument("trainable_leyers", type=int, default=5, help="")
-
-    parser.add_argument("batch_size", type=int, default=5, help="")
-
-    parser.add_argument("epochs", type=int, default=20, help="")
-
-    parser.add_argument(
         "--test-size",
         type=float,
         default=0.25,
         help=("The proportion of the dataset to include in the test split. "
               "Float number between 0.0 and 1.0"))
-
     parser.add_argument(
         "--validation-size",
         type=float,
@@ -87,7 +63,33 @@ def parse_args(args):
         help=(
             "The proportion of the dataset to include in the validation split. "
             "Float number between 0.0 and 1.0"))
+    parser.add_argument(
+        "--balancing-multiplier",
+        type=float,
+        default=1.0,
+        help=
+        "proportion of false samples w.r.t true samples (e.g. 1.0 = 50%% true, 50%% false)"
+    )
+    parser.add_argument(
+        "--trainable-layers",
+        type=int,
+        default=5,
+        help="number of upper layers of ResNet-50 to retrain")
+    parser.add_argument("--batch-size", type=int, default=5, help="Batch size")
+    parser.add_argument(
+        "--epochs", type=int, default=20, help="number of epochs to run")
 
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='aplatam {ver}'.format(ver=__version__))
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        dest="loglevel",
+        help="set loglevel to INFO",
+        action='store_const',
+        const=logging.INFO)
     parser.add_argument(
         '-vv',
         '--very-verbose',
@@ -125,15 +127,11 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
+
+    # Set seed number
     if args.seed:
-        _logger.info('Seed: {}'.format(args.seed))
+        _logger.info('Seed: %d', args.seed)
         random.seed(args.seed)
-
-    config = read_config_file(args.config_file, 'train')
-
-    test_size = config.getfloat('test_size')
-    validation_size = config.getfloat('validation_size')
-    aug = config.getfloat('aug')
 
     # Gather all files in dataset
     true_files = glob.glob(os.path.join(args.dataset_dir, 't', '*.jpg'))
@@ -146,8 +144,13 @@ def main(args):
         tempdir = tempfile.mkdtemp(prefix=__name__)
         _logger.info('temporary directory %s created', tempdir)
 
-    split_dataset((true_files, false_files), tempdir, test_size,
-                  validation_size, aug)
+    # Split dataset into train, validation and test sets
+    split_dataset(
+        (true_files, false_files),
+        tempdir,
+        test_size=args.test_size,
+        validation_size=args.validation_size,
+        balancing_multiplier=args.balancing_multiplier)
 
     _logger.info('Done')
 

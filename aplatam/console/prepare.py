@@ -13,7 +13,7 @@ import fiona
 import rasterio
 from aplatam import __version__
 from aplatam.build_trainset import build_trainset
-from aplatam.util import all_raster_files, read_config_file, write_metadata
+from aplatam.util import all_raster_files, write_metadata
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -37,6 +37,7 @@ def parse_args(args):
 
     """
     parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description=('Prepare a dataset for training a model from a set of. '
                      'preprocessed rasters and a vector file of polygons.'))
 
@@ -47,38 +48,35 @@ def parse_args(args):
     parser.add_argument('output_dir', help='path to output dataset directory')
 
     # Options
-    parser.add_argument(
-        '--version',
-        action='version',
-        version='aplatam {ver}'.format(ver=__version__))
-    parser.add_argument(
-        '-c',
-        '--config-file',
-        default='default.cfg',
-        help='configuration file')
-
     parser.add_argument("--size", type=int, default=128, help="window size")
-
     parser.add_argument(
         "--step-size",
         type=int,
         default=64,
         help="step size for sliding window")
-
     parser.add_argument(
         "--buffer-size",
         type=int,
         default=0,
         help=
-        "If buffer_size > 0, polygons are expanded with a fixed-sized buffer")
-
+        "if buffer_size > 0, polygons are expanded with a fixed-sized buffer")
+    parser.add_argument(
+        "--rescale-intensity",
+        dest='rescale_intensity',
+        default=True,
+        action='store_true',
+        help="Rescale intensity")
+    parser.add_argument(
+        "--no-rescale-intensity",
+        dest='rescale_intensity',
+        action='store_false',
+        help="Do not rescale intensity")
     parser.add_argument(
         "--lower-cut",
         type=int,
         default=2,
         help=
         "Lower cut of percentiles for cumulative count in intensity rescaling")
-
     parser.add_argument(
         "--upper-cut",
         type=int,
@@ -86,6 +84,10 @@ def parse_args(args):
         help=
         "upper cut of percentiles for cumulative count in intensity rescaling")
 
+    parser.add_argument(
+        '--version',
+        action='version',
+        version='aplatam {ver}'.format(ver=__version__))
     parser.add_argument(
         '-v',
         '--verbose',
@@ -112,7 +114,7 @@ def setup_logging(loglevel):
       loglevel (int): minimum loglevel for emitting messages
 
     """
-    logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
+    logformat = "[%(asctime)s] %(levelname)s %(name)s -- %(message)s"
     logging.basicConfig(
         level=loglevel,
         stream=sys.stdout,
@@ -131,16 +133,23 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
 
-    config = read_config_file(args.config_file, 'prepare')
+    opts = dict(
+        size=args.size,
+        step_size=args.step_size,
+        buffer_size=args.buffer_size,
+        rescale_intensity=args.rescale_intensity,
+        lower_cut=args.lower_cut,
+        upper_cut=args.upper_cut)
+    _logger.info('Options: %s', opts)
 
-    _logger.debug('Collect all rasters from %s', args.rasters_dir)
+    _logger.info('Collect all rasters from %s', args.rasters_dir)
     rasters = all_raster_files(args.rasters_dir)
 
     validate_rasters_band_count(rasters)
 
-    build_trainset(rasters, args.vector, config, output_dir=args.output_dir)
+    build_trainset(rasters, args.vector, output_dir=args.output_dir, **opts)
 
-    write_metadata(args.output_dir, version=__version__, **config)
+    write_metadata(args.output_dir, version=__version__, **opts)
 
     _logger.info('Done')
 

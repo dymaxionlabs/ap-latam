@@ -10,7 +10,7 @@ def split_dataset(files,
                   output_dir,
                   test_size=0.25,
                   validation_size=0.25,
-                  aug=1):
+                  balancing_multiplier=1):
     """
     Split a list of files into training, validation and test datasets
 
@@ -20,8 +20,8 @@ def split_dataset(files,
         test_size {float} -- proportion of test set from total of true samples
         validation_size {float} -- proportion of validation set from total of
             true samples.
-        aug {float} -- proportion of false samples w.r.t true samples (e.g.
-            1.0 = 50% true 50% false)
+        balancing_multiplier {float} -- proportion of false samples w.r.t
+            true samples (e.g. 1.0 = 50% true 50% false)
 
     """
     # FIXME Also do these asserts as validations when parsing arguments
@@ -29,7 +29,7 @@ def split_dataset(files,
         'test_size should be between 0.0 and 1.0')
     assert validation_size >= 0.0 and validation_size <= 1.0, (
         'validation_size should be between 0.0 and 1.0')
-    assert aug >= 1.0, 'aug should be greater or equal to 1'
+    assert balancing_multiplier >= 1.0, 'aug should be greater or equal to 1'
 
     # First shuffle dataset
     true_files, false_files = files
@@ -43,7 +43,7 @@ def split_dataset(files,
     # Calculate test size based on total of true samples
     n_total = min(len(true_files), len(false_files))
     n_test_t = round(n_total * test_size)
-    n_test_f = round(n_test_t * aug)
+    n_test_f = round(n_test_t * balancing_multiplier)
 
     # Split to build test set
     t_test, t_rest = true_files[:n_test_t], true_files[n_test_t:]
@@ -51,7 +51,7 @@ def split_dataset(files,
 
     # Calculate validation size
     n_validation_t = round(n_total * validation_size)
-    n_validation_f = round(n_validation_t * aug)
+    n_validation_f = round(n_validation_t * balancing_multiplier)
 
     # Split again to build validation set
     t_validation, t_train = t_rest[:n_validation_t], t_rest[n_validation_t:]

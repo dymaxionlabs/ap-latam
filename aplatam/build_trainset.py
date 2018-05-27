@@ -16,7 +16,16 @@ from aplatam.util import (create_index, get_raster_crs, reproject_shape,
 _logger = logging.getLogger(__name__)
 
 
-def build_trainset(rasters, vector, config, *, output_dir):
+def build_trainset(rasters,
+                   vector,
+                   buffer_size=0,
+                   rescale_intensity=True,
+                   lower_cut=2,
+                   upper_cut=98,
+                   *,
+                   output_dir,
+                   size,
+                   step_size):
     """
     Build a training set of image tiles from a collection of +rasters+
     for a binary classifier.
@@ -35,11 +44,6 @@ def build_trainset(rasters, vector, config, *, output_dir):
     * step_size: Sliding window size (in pixels)
 
     """
-    intensity_percentiles = config.getint('lower_cut'), config.getint(
-        'upper_cut')
-    buffer_size = config.getint('buffer_size')
-    size, step_size = config.getint('size'), config.getint('step_size')
-
     for raster in rasters:
         shapes, vector_crs = read_shapes(vector)
         raster_crs = get_raster_crs(raster)
@@ -54,7 +58,9 @@ def build_trainset(rasters, vector, config, *, output_dir):
             raster,
             size=size,
             step_size=step_size,
-            intensity_percentiles=intensity_percentiles)
+            rescale_intensity=rescale_intensity,
+            lower_cut=lower_cut,
+            upper_cut=upper_cut)
 
 
 def read_shapes(vector):
@@ -76,10 +82,12 @@ def apply_buffer(shapes, buffer_size):
 def write_window_tiles(shapes,
                        output_dir,
                        tile_fname,
-                       size=64,
-                       step_size=16,
                        rescale_intensity=True,
-                       intensity_percentiles=(2, 98)):
+                       lower_cut=2,
+                       upper_cut=98,
+                       *,
+                       size,
+                       step_size):
     "Extract windows of +size+ by sliding it +step_size+ on a raster, and write files"
 
     # Create R-Tree index with shapes to speed up intersection operation
@@ -94,7 +102,7 @@ def write_window_tiles(shapes,
                 win_fname = prepare_img_filename(tile_fname, window)
                 img_dir = create_class_dir(output_dir, img_class)
                 rgb = extract_img(src, window, rescale_intensity,
-                                  intensity_percentiles)
+                                  (lower_cut, upper_cut))
                 save_jpg(img_dir, win_fname, rgb)
             except RuntimeError:
                 pass
