@@ -14,6 +14,7 @@ import tempfile
 
 from aplatam import __version__
 from aplatam.class_balancing import split_dataset
+import json
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -101,6 +102,12 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
+def read_metadata(dataset_dir):
+    metadata_path = os.path.join(dataset_dir, "metadata.json")
+    with open(metadata_path) as f:
+        return json.load(f)
+
+
 def setup_logging(loglevel):
     """
     Setup basic logging
@@ -127,6 +134,7 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
+    dataset_opts = read_metadata(args.dataset_dir)
 
     # Set seed number
     if args.seed:

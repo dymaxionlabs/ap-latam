@@ -6,16 +6,19 @@ from keras.models import Sequential, Model
 from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, EarlyStopping
+import logging
 
 RESNET_50_LAYERS = 174
 
+_logger = logging.getLogger(__name__)
 
-def train(trainable_layers, output_model, batch_size, epochs):
+
+def train(trainable_layers, output_model, batch_size, epochs, size):
     train_files = glob.glob(
         os.path.join('data_keras/', 'train_hires_balanced/**/', '*.jpg'))
     validation_files = glob.glob(
         os.path.join('data_keras/', 'validation_hires_balanced/**/', '*.jpg'))
-    img_width, img_height = 256, 256
+    img_width, img_height = size, size
     train_data_dir = "data_keras/train_hires_balanced"
     validation_data_dir = "data_keras/validation_hires_balanced"
     nb_train_samples = len(train_files)
