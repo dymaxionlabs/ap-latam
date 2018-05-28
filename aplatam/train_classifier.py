@@ -7,6 +7,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, EarlyStopping
 
+RESNET_50_LAYERS = 174
+
 
 def train(trainable_layers, output_model, batch_size, epochs):
     train_files = glob.glob(
@@ -22,9 +24,9 @@ def train(trainable_layers, output_model, batch_size, epochs):
     #class_weights = { 0: 1., 1: round((nb_train_samples - nb_true_train_files)/nb_true_train_files)}
     #print(class_weights)
 
-    model = model_width_height(img_width, img_height)
+    model = build_resnet50_model(img_width, img_height)
 
-    model_layer(model, trainable_layers)
+    freeze_layers(model, trainable_layers)
 
     predictions = adding_custom_ayers(model)
 
@@ -60,13 +62,12 @@ def train(trainable_layers, output_model, batch_size, epochs):
                 trainable_layers)
 
 
-def model_width_height(img_width, img_height):
-    """model  """
-    model = applications.resnet50.ResNet50(
+def build_resnet50_model(img_width, img_height):
+    """Build a ResNet-50 model"""
+    return applications.resnet50.ResNet50(
         weights="imagenet",
         include_top=False,
         input_shape=(img_width, img_height, 3))
-    return model
 
 
 def train_model(model_final, train_generator, nb_train_samples, batch_size,
@@ -127,13 +128,12 @@ def adding_custom_ayers(model):
     return predictions
 
 
-def model_layer(model, trainable_layers):
-    """Freeze the layers which you don't want to train. Here I am freezing the first 5 layers"""
-    i = 0
-    for layer in model.layers[:(174 - int(trainable_layers))]:
+def freeze_layers(model, trainable_layers):
+    """Make the last +trainable_layers+ in model trainable by freezing the others"""
+    assert trainable_layers < RESNET_50_LAYERS
+
+    for layer in model.layers[:(RESNET_50_LAYERS - trainable_layers)]:
         layer.trainable = False
     for layer in model.layers:
-        print(layer.name, layer.trainable)
-        i += 1
-    print(model.summary())
-    print(i)
+        _logger.debug('Layer %s is trainable: %s', layer.name, layer.trainable)
+    _logger.debug('Model summary: %s', model.summary())
