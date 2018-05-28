@@ -1,8 +1,5 @@
-import glob
 import logging
 import os
-import random
-import shutil
 
 import fiona
 import numpy as np
@@ -34,8 +31,6 @@ def build_trainset(rasters,
     is stored in the directory for "true" samples. Otherwise, it is stored in
     the directory corresponding to "false" samples.
     Both directories are stored in +output_dir+.
-
-    +config+ is a configuration dictionary with several options:
 
     * lower_cut, upper_cut: Lower/upper cut of percentiles for intensity
       rescaling.
@@ -101,8 +96,12 @@ def write_window_tiles(shapes,
                 img_class = image_class_string(matching_shapes, window_box)
                 win_fname = prepare_img_filename(tile_fname, window)
                 img_dir = create_class_dir(output_dir, img_class)
-                rgb = extract_img(src, window, rescale_intensity,
-                                  (lower_cut, upper_cut))
+                rgb = extract_img(
+                    src,
+                    window,
+                    rescale_intensity=rescale_intensity,
+                    lower_cut=lower_cut,
+                    upper_cut=upper_cut)
                 save_jpg(img_dir, win_fname, rgb)
             except RuntimeError:
                 pass
@@ -121,11 +120,12 @@ def prepare_img_filename(tile_fname, window):
     return win_fname
 
 
-def extract_img(src, window, rescale_intensity, intensity_percentiles):
+def extract_img(src, window, rescale_intensity=True, lower_cut=2,
+                upper_cut=98):
     """Extract image from raster and preprocess"""
     rgb = np.dstack([src.read(b, window=window) for b in range(1, 4)])
     if rescale_intensity:
-        low, high = np.percentile(rgb, intensity_percentiles)
+        low, high = np.percentile(rgb, (lower_cut, upper_cut))
         rgb = exposure.rescale_intensity(rgb, in_range=(low, high))
     return rgb
 
