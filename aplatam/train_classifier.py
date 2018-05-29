@@ -13,16 +13,21 @@ RESNET_50_LAYERS = 174
 _logger = logging.getLogger(__name__)
 
 
-def train(trainable_layers, output_model, batch_size, epochs, size):
-    train_files = glob.glob(
-        os.path.join('data_keras/', 'train_hires_balanced/**/', '*.jpg'))
+def train(trainable_layers, output_model, batch_size, epochs, size, tempdir):
+    train_data_dir = os.path.join(tempdir, "train")
+
+    train_files = glob.glob(os.path.join(train_data_dir, "**", "*.jpg"))
+
+    validation_data_dir = os.path.join(tempdir, "validation")
+
     validation_files = glob.glob(
-        os.path.join('data_keras/', 'validation_hires_balanced/**/', '*.jpg'))
-    img_width, img_height = size, size
-    train_data_dir = "data_keras/train_hires_balanced"
-    validation_data_dir = "data_keras/validation_hires_balanced"
+        os.path.join(validation_data_dir, "**", "*.jpg"))
+
     nb_train_samples = len(train_files)
+
     nb_validation_samples = len(validation_files)
+
+    img_width, img_height = size, size
     #nb_true_train_files = len(glob.glob(os.path.join('data_keras/','train_hires_balanced/vya', '*.jpg')))
     #class_weights = { 0: 1., 1: round((nb_train_samples - nb_true_train_files)/nb_true_train_files)}
     #print(class_weights)
@@ -62,7 +67,7 @@ def train(trainable_layers, output_model, batch_size, epochs, size):
     # Train the model
     train_model(model_final, train_generator, nb_train_samples, batch_size,
                 epochs, validation_generator, nb_validation_samples, early,
-                trainable_layers)
+                trainable_layers, output_model)
 
 
 def build_resnet50_model(img_width, img_height):
@@ -75,7 +80,7 @@ def build_resnet50_model(img_width, img_height):
 
 def train_model(model_final, train_generator, nb_train_samples, batch_size,
                 epochs, validation_generator, nb_validation_samples, early,
-                trainable_layers):
+                trainable_layers, output_model):
     """Train the model"""
     model_final.fit_generator(
         train_generator,
@@ -87,7 +92,7 @@ def train_model(model_final, train_generator, nb_train_samples, batch_size,
         callbacks=[early])
 
     # Finally, save model
-    model_final.save('/models/hires_aug_1_{}.h5'.format(trainable_layers))
+    model_final.save(output_model)
     print('Done with {} layers'.format(trainable_layers))
 
 
