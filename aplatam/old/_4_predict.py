@@ -10,23 +10,22 @@ using a training model built with build_trainset_hires.py
   - If prediction result > 0.3, generate a polygon
 * Write a vector file with all polygons
 """
-from keras.preprocessing.image import ImageDataGenerator
-from shapely.geometry import shape, box, mapping
-from shapely.ops import transform
-from skimage import exposure
-from functools import partial
 import glob
+import os
+import sys
+from functools import partial
+
 import keras.models
 import numpy as np
-import os
 import pyproj
 import rasterio as rio
-import sys
 import tqdm
+from keras.preprocessing.image import ImageDataGenerator
+from shapely.geometry import box, mapping, shape
+from shapely.ops import transform
+from skimage import exposure
 
-sys.path.append(
-    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
-from aplatam.old.util import window_to_bounds, sliding_windows
+from .util import sliding_windows, window_to_bounds
 
 
 def write_geojson(shapes_and_probs, output_path):
@@ -56,7 +55,7 @@ def predict_image(fname, model, size, step_size=None, rescale_intensity=False):
         step_size = size
 
     with rio.open(fname) as src:
-        #imgs = []
+        imgs = []
         windows = []
         for window in sliding_windows(size, step_size, src.shape):
             window_box = box(*window_to_bounds(window, src.transform))
@@ -94,24 +93,6 @@ def predict_images(input_dir, output, model, size, **kwargs):
     print('{} written'.format(output))
 
 
-def main(args):
-    #datagen = ImageDataGenerator(rescale=1. / 255)
-    model = keras.models.load_model(args.model_file)
-    img_size = model.input_shape[1]
-
-    step_size = None
-    if args.step_size:
-        step_size = int(args.step_size)
-
-    predict_images(
-        args.input_dir,
-        args.output,
-        model,
-        img_size,
-        step_size=step_size,
-        rescale_intensity=args.rescale_intensity)
-
-
 if __name__ == "__main__":
     import argparse
 
@@ -135,4 +116,18 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args)
+    datagen = ImageDataGenerator(rescale=1. / 255)
+    model = keras.models.load_model(args.model_file)
+    img_size = model.input_shape[1]
+
+    step_size = None
+    if args.step_size:
+        step_size = int(args.step_size)
+
+    predict_images(
+        args.input_dir,
+        args.output,
+        model,
+        img_size,
+        step_size=step_size,
+        rescale_intensity=args.rescale_intensity)
