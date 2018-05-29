@@ -15,6 +15,7 @@ import tempfile
 from aplatam import __version__
 from aplatam.class_balancing import split_dataset
 import json
+from aplatam.train_classifier import train
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -135,6 +136,7 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
     dataset_opts = read_metadata(args.dataset_dir)
+    size = dataset_opts["size"]
 
     # Set seed number
     if args.seed:
@@ -159,6 +161,9 @@ def main(args):
         test_size=args.test_size,
         validation_size=args.validation_size,
         balancing_multiplier=args.balancing_multiplier)
+
+    train(args.trainable_layers, args.output_model, args.batch_size,
+          args.epochs, size, tempdir)
 
     _logger.info('Done')
 
