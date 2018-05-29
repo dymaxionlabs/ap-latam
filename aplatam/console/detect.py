@@ -29,9 +29,19 @@ def parse_args(args):
       :obj:`argparse.Namespace`: command line parameters namespace
 
     """
+
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="...")
+    # Mandatory arguments
+
+    parser.add_argument('model_file', help='HDF5 Keras model file path')
+    parser.add_argument(
+        'input_dir', help='Path where test hi-res images are stored')
+    parser.add_argument('output', help='GeoJSON output file')
+
+    # Options
+
     parser.add_argument(
         '--version',
         action='version',
@@ -50,6 +60,35 @@ def parse_args(args):
         help="set loglevel to DEBUG",
         action='store_const',
         const=logging.DEBUG)
+    parser.add_argument(
+        "--rescale-intensity",
+        dest='rescale_intensity',
+        default=True,
+        action='store_true',
+        help="Rescale intensity")
+    parser.add_argument(
+        "--no-rescale-intensity",
+        dest='rescale_intensity',
+        action='store_false',
+        help="Do not rescale intensity")
+    parser.add_argument(
+        "--lower-cut",
+        type=int,
+        default=2,
+        help=
+        "Lower cut of percentiles for cumulative count in intensity rescaling")
+    parser.add_argument(
+        "--upper-cut",
+        type=int,
+        default=98,
+        help=
+        "upper cut of percentiles for cumulative count in intensity rescaling")
+
+    parser.add_argument(
+        '--step-size',
+        default=None,
+        help='Step size of sliding windows (if none, same as size)')
+
     return parser.parse_args(args)
 
 
