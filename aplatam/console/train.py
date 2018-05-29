@@ -41,7 +41,9 @@ def parse_args(args):
 
     # Mandatory arguments
     parser.add_argument(
-        'dataset_dir', help='directory containing the prepared dataset')
+        'base_dataset_dir', help='directory containing the prepared dataset')
+
+    parser.add_argument('dataset_dir', help='path to temporary directory')
 
     # Options
     parser.add_argument(
@@ -49,7 +51,7 @@ def parse_args(args):
         '--output-model',
         default='model.h5',
         help='filename for output model')
-    parser.add_argument('--temp-dir', help='path to temporary directory')
+
     parser.add_argument(
         '--seed', type=int, help='seed number for the random number generator')
     parser.add_argument(
@@ -103,8 +105,8 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def read_metadata(dataset_dir):
-    metadata_path = os.path.join(dataset_dir, "metadata.json")
+def read_metadata(base_dataset_dir):
+    metadata_path = os.path.join(base_dataset_dir, "metadata.json")
     with open(metadata_path) as f:
         return json.load(f)
 
@@ -135,7 +137,7 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    dataset_opts = read_metadata(args.dataset_dir)
+    dataset_opts = read_metadata(args.base_dataset_dir)
     size = dataset_opts["size"]
 
     # Set seed number
@@ -144,26 +146,19 @@ def main(args):
         random.seed(args.seed)
 
     # Gather all files in dataset
-    true_files = glob.glob(os.path.join(args.dataset_dir, 't', '*.jpg'))
-    false_files = glob.glob(os.path.join(args.dataset_dir, 'f', '*.jpg'))
-
-    # Create temporary directory, if not supplied as argument
-    if args.temp_dir:
-        tempdir = args.temp_dir
-    else:
-        tempdir = tempfile.mkdtemp(prefix=__name__)
-        _logger.info('temporary directory %s created', tempdir)
+    true_files = glob.glob(os.path.join(args.base_dataset_dir, 't', '*.jpg'))
+    false_files = glob.glob(os.path.join(args.base_dataset_dir, 'f', '*.jpg'))
 
     # Split dataset into train, validation and test sets
     split_dataset(
         (true_files, false_files),
-        tempdir,
+        args.base_dataset_dir,
         test_size=args.test_size,
         validation_size=args.validation_size,
         balancing_multiplier=args.balancing_multiplier)
 
     train(args.trainable_layers, args.output_model, args.batch_size,
-          args.epochs, size, tempdir)
+          args.epochs, size, args.dataset_dir)
 
     _logger.info('Done')
 
