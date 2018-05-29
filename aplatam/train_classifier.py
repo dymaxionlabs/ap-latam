@@ -13,12 +13,13 @@ RESNET_50_LAYERS = 174
 _logger = logging.getLogger(__name__)
 
 
-def train(trainable_layers, output_model, batch_size, epochs, size, tempdir):
-    train_data_dir = os.path.join(tempdir, "train")
+def train(trainable_layers, output_model, batch_size, epochs, size,
+          dataset_dir):
+    train_data_dir = os.path.join(dataset_dir, "train")
 
     train_files = glob.glob(os.path.join(train_data_dir, "**", "*.jpg"))
 
-    validation_data_dir = os.path.join(tempdir, "validation")
+    validation_data_dir = os.path.join(dataset_dir, "validation")
 
     validation_files = glob.glob(
         os.path.join(validation_data_dir, "**", "*.jpg"))
