@@ -8,8 +8,17 @@ polygons.
 import argparse
 import logging
 import sys
-
+import rasterio as rio
+import glob
+import os
+import tqdm
+from shapely.geometry import shape, box, mapping
+import numpy as np
+from skimage import exposure
+from keras.preprocessing.image import ImageDataGenerator
+from aplatam.old.util import window_to_bounds, sliding_windows
 from aplatam import __version__
+import keras.models
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -108,6 +117,48 @@ def setup_logging(loglevel):
         datefmt="%Y-%m-%d %H:%M:%S")
 
 
+def predict_image(fname, model, size, step_size=None, rescale_intensity=False):
+    if not step_size:
+        step_size = size
+
+    with rio.open(fname) as src:
+        #imgs = []
+        windows = []
+        for window in sliding_windows(size, step_size, src.shape):
+            window_box = box(*window_to_bounds(window, src.transform))
+
+            img = np.dstack([src.read(b, window=window) for b in range(1, 4)])
+
+            if rescale_intensity:
+                low, high = np.percentile(img, (2, 98))
+                img = exposure.rescale_intensity(img, in_range=(low, high))
+
+            img = img / 255.
+            preds = model.predict(np.array([img]))
+            preds_b = preds[:, 0]
+            for i in np.nonzero(preds_b > 0.3)[0]:
+                _logger.info((window, float(preds_b[i])))
+                windows.append((window_box, float(preds_b[i])))
+        #if cur_windows:
+        #    name, _ = os.path.splitext(os.path.basename(fname))
+        #    output = '/tmp/{}_windows.geojson'.format(name)
+        #    write_geojson(cur_windows, output)
+
+        return windows
+
+
+def predict_images(input_dir, model, size, **kwargs):
+    all_windows = []
+    files = glob.glob(os.path.join(input_dir, '**/*.tif'), recursive=True)
+    _logger.info(files)
+    for fname in tqdm.tqdm(files):
+        all_windows.extend(predict_image(fname, model, size, **kwargs))
+    _logger.info("Done! Found %d matching windows  on all files ",
+                 (len(all_windows)))
+    return all_windows
+    #print('{} written'.format(output))
+
+
 def main(args):
     """
     Main entry point allowing external calls
@@ -122,6 +173,17 @@ def main(args):
     # ...
     _logger.warn("Not done yet")
     #_logger.info("Done")
+
+    datagen = ImageDataGenerator(rescale=1. / 255)
+    model = keras.models.load_model(args.model_file)
+    img_size = model.input_shape[1]
+
+    predict_images(
+        args.input_dir,
+        model,
+        img_size,
+        step_size=args.step_size,
+        rescale_intensity=args.rescale_intensity)
 
 
 def run():
