@@ -18,7 +18,8 @@ from skimage import exposure
 from keras.preprocessing.image import ImageDataGenerator
 from aplatam.old.util import window_to_bounds, sliding_windows
 from aplatam import __version__
-import keras.models
+import json
+from shapely.geometry import shape, mapping
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -184,6 +185,15 @@ def main(args):
         img_size,
         step_size=args.step_size,
         rescale_intensity=args.rescale_intensity)
+
+
+def write_geojson(shapes, output_path):
+    d = {'type': 'FeatureCollection', 'features': []}
+    for shape in shapes:
+        feat = {'type': 'Feature', 'geometry': mapping(shape)}
+        d['features'].append(feat)
+    with open(output_path, 'w') as f:
+        f.write(json.dumps(d))
 
 
 def run():
