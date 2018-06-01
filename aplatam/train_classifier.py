@@ -146,3 +146,12 @@ def freeze_layers(model, trainable_layers):
     for layer in model.layers:
         _logger.debug('Layer %s is trainable: %s', layer.name, layer.trainable)
     _logger.debug('Model summary: %s', model.summary())
+
+
+def write_geojson(shapes, output_path):
+    d = {'type': 'FeatureCollection', 'features': []}
+    for shape in shapes:
+        feat = {'type': 'Feature', 'geometry': mapping(shape)}
+        d['features'].append(feat)
+    with open(output_path, 'w') as f:
+        f.write(json.dumps(d))
