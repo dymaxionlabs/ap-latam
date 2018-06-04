@@ -8,3 +8,4 @@ before_install:
 
 script:
   - docker run aplatam pytest
+  - docker run aplatam coverage run -m pytest
