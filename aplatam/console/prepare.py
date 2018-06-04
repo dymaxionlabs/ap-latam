@@ -12,8 +12,8 @@ import sys
 import fiona
 import rasterio
 from aplatam import __version__
-from aplatam.build_trainset import build_trainset
-from aplatam.util import all_raster_files, write_metadata
+from aplatam.build_trainset import CnnTrainsetBuilder
+from aplatam.util import all_raster_files
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -134,6 +134,7 @@ def main(args):
     setup_logging(args.loglevel)
 
     opts = dict(
+        version=__version__,
         size=args.size,
         step_size=args.step_size,
         buffer_size=args.buffer_size,
@@ -147,9 +148,8 @@ def main(args):
 
     validate_rasters_band_count(rasters)
 
-    build_trainset(rasters, args.vector, output_dir=args.output_dir, **opts)
-
-    write_metadata(args.output_dir, version=__version__, **opts)
+    builder = CnnTrainsetBuilder(rasters, args.vector, **opts)
+    builder.build(args.output_dir)
 
     _logger.info('Done')
 
