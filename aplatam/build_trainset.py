@@ -9,6 +9,7 @@ from shapely.geometry import box, shape
 from skimage import exposure
 from skimage.io import imsave
 
+from aplatam import __version__
 from aplatam.util import (create_index, get_raster_crs, reproject_shape,
                           sliding_windows, window_to_bounds, write_metadata)
 
@@ -32,7 +33,6 @@ class CnnTrainsetBuilder:
         vector {string} -- path to vector file of shapes
         size {int} -- size in pixels of sliding window
         step_size {int} -- how many pixels to slide window
-        version {string} -- version number
 
     Keyword Arguments:
         buffer_size {float} -- size of buffer (default: {0})
@@ -51,13 +51,11 @@ class CnnTrainsetBuilder:
                  upper_cut=2,
                  *,
                  size,
-                 step_size,
-                 version):
+                 step_size):
         self.rasters = rasters
         self.vector = vector
         self.size = size
         self.step_size = step_size
-        self.version = version
         self.buffer_size = buffer_size
         self.rescale_intensity = rescale_intensity
         self.lower_cut = lower_cut
@@ -196,7 +194,7 @@ class CnnTrainsetBuilder:
     def _write_metadata(self, output_dir):
         write_metadata(
             output_dir,
-            version=self.version,
+            version=__version__,
             size=self.size,
             step_size=self.step_size,
             buffer_size=self.buffer_size,
