@@ -20,4 +20,6 @@ RUN poetry install
 
 ADD . /app/
 
+ENV PYTHONPATH /app
+
 ENTRYPOINT ["/app/docker/entrypoint.sh"]
