@@ -1,5 +1,7 @@
 # AP Latam
 
+[![Build Status](https://travis-ci.org/dymaxionlabs/ap-latam.svg?branch=master)](https://travis-ci.org/dymaxionlabs/ap-latam)
+
 This is the main repository of AP Latam project.
 
 For more information on the website frontend, see
