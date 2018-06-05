@@ -9,3 +9,6 @@ before_install:
 script:
   - docker run aplatam pytest
   - docker run aplatam coverage run -m pytest
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
