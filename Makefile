@@ -9,4 +9,4 @@ test:
 	poetry run pytest
 
 build_image:
-	docker build -t aplatam .
+	docker build -t dymaxionlabs/aplatam:latest .
