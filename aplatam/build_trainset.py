@@ -68,12 +68,20 @@ class CnnTrainsetBuilder:
             output_dir {string} -- output directory path
         """
 
+        shapes, vector_crs = self._read_shapes()
+        _logger.info('Total shapes: %d', len(shapes))
+        _logger.info('Vector CRS is %s', vector_crs)
+
         for raster in self.rasters:
-            shapes, vector_crs = self._read_shapes()
+            _logger.info('Processing raster %s', raster)
+
             raster_crs = get_raster_crs(raster)
-            shapes = self._reproject_shapes(shapes, vector_crs, raster_crs)
-            shapes = self._apply_buffer(shapes)
-            self._write_window_tiles(shapes, output_dir, raster)
+            _logger.info('Raster CRS is %s', raster_crs)
+
+            new_shapes = self._reproject_shapes(shapes, vector_crs, raster_crs)
+            new_shapes = self._apply_buffer(new_shapes)
+
+            self._write_window_tiles(new_shapes, output_dir, raster)
         self._write_metadata(output_dir)
 
     def _read_shapes(self):
@@ -103,6 +111,9 @@ class CnnTrainsetBuilder:
                 window_box = box(*window_to_bounds(window, src.transform))
                 matching_shapes = self._intersect_window(
                     shapes, index, window_box)
+
+                if len(matching_shapes) > 0:
+                    _logger.info('Matching window at %s, containing %d shapes', window, len(matching_shapes))
                 try:
                     img_class = self._image_class_string(
                         matching_shapes, window_box)
