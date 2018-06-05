@@ -3,12 +3,12 @@ import logging
 import os
 from functools import partial
 from glob import glob
-
 import json
 import pyproj
 import rasterio
 import rtree
 from shapely.ops import transform
+from shapely.geometry import shape, box, mapping
 
 _logger = logging.getLogger(__name__)
 
@@ -67,3 +67,12 @@ def write_metadata(output_dir, **kwargs):
     os.makedirs(output_dir, exist_ok=True)
     with open(os.path.join(output_dir, 'metadata.json'), 'w') as f:
         json.dump(kwargs, f)
+
+
+def write_geojson(shapes, output_path):
+    d = {'type': 'FeatureCollection', 'features': []}
+    for shape in shapes:
+        feat = {'type': 'Feature', 'geometry': mapping(shape)}
+        d['features'].append(feat)
+    with open(output_path, 'w') as f:
+        f.write(json.dumps(d))
