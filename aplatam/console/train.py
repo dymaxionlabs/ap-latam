@@ -152,7 +152,7 @@ def main(args):
     # Split dataset into train, validation and test sets
     split_dataset(
         (true_files, false_files),
-        args.base_dataset_dir,
+        args.dataset_dir,
         test_size=args.test_size,
         validation_size=args.validation_size,
         balancing_multiplier=args.balancing_multiplier)

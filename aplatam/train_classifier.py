@@ -15,6 +15,7 @@ _logger = logging.getLogger(__name__)
 
 def train(trainable_layers, output_model, batch_size, epochs, size,
           dataset_dir):
+
     train_data_dir = os.path.join(dataset_dir, "train")
 
     train_files = glob.glob(os.path.join(train_data_dir, "**", "*.jpg"))
@@ -114,7 +115,6 @@ def train_data_generator(train_datagen, train_data_dir, img_height, img_width,
         train_data_dir,
         target_size=(img_height, img_width),
         batch_size=batch_size,
-        save_to_dir='/tmp/keras',
         class_mode="binary")
     return train_generator
 
