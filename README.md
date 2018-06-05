@@ -8,6 +8,7 @@ This is the main repository of AP Latam project.
 For more information on the website frontend, see
 [web/README.md](web/README.md).
 
+
 ## Dependencies
 
 * Python 3+
@@ -15,6 +16,7 @@ For more information on the website frontend, see
 * Proj4
 * libspatialindex
 * Dependencies for TensorFlow with GPU support
+
 
 ## Development
 
@@ -35,6 +37,25 @@ environment and install all required packages there.
 
 Run `make` to run tests and `make cov` to build a code coverage report. You can
 run `make` to do both.
+
+
+## Issue tracker
+
+Please report any bugs and enhancement ideas using the GitHub issue tracker:
+
+  https://github.com/dymaxionlabs/ap-latam/issues
+
+Feel free to also ask questions on our
+[Gitter channel](https://gitter.im/dymaxionlabs/ap-latam), or by email.
+
+
+## Help wanted
+
+Any help in testing, development, documentation and other tasks is highly
+appreciated and useful to the project.
+
+For more details, see the file [CONTRIBUTING.md](CONTRIBUTING.md).
+
 
 ## License
 
