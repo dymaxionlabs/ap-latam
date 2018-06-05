@@ -134,7 +134,6 @@ def main(args):
     setup_logging(args.loglevel)
 
     opts = dict(
-        version=__version__,
         size=args.size,
         step_size=args.step_size,
         buffer_size=args.buffer_size,
