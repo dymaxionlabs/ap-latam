@@ -1,14 +1,21 @@
-sudo: required
+language: python
 
-services:
-  - docker
+python:
+  - "3.6"
 
 before_install:
-  - docker build -t aplatam .
+  - sudo apt-get install -y build-essential gdal-bin libgdal-dev libproj-dev libspatialindex-dev
+  - pip install --user -U poetry
+
+install:
+  - poetry install
+
+addons:
+  apt:
+    update: true
 
 script:
-  - docker run aplatam pytest
-  - docker run aplatam coverage run -m pytest
+  - make
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
