@@ -1,6 +1,7 @@
 # Virtual environments
 env/
 venv/
+.venv/
 
 # Temporary and binary files
 *~
