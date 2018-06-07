@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install -U poetry
 
 COPY pyproject.toml pyproject.lock /app/
-RUN poetry install
+RUN poetry install --no-dev
 
 ADD . /app/
 
