@@ -18,6 +18,51 @@ For more information on the website frontend, see the repository at
 * Dependencies for TensorFlow with GPU support
 
 
+## Install
+
+### Quick install and usage: Docker image
+
+If you have [Docker](https://www.docker.com/community-edition) installed on
+your machine, you can simply pull our image and run the scripts for training
+and detection.
+
+For all scripts you will need to mount a data volume so that the scripts can
+read the input rasters and vector files, and write the resulting vector file.
+
+It is recommended that you first set an environment variable that points to the
+data directory in your host machine, like this:
+
+```
+export APLATAM_DATA=$HOME/aplatam-data
+```
+
+Then, to use any of the scripts, you would have to run them using docker and
+mounting a volume to `$APLATAM_DATA` like this:
+
+```
+docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam SCRIPT_TO_RUN [ARGS...]
+```
+
+where `SCRIPT_TO_RUN` is either `ap_prepare`, `ap_train` or `ap_detect` and
+`[ARGS...]` the command line arguments of the specified script. You can run
+with `--help` to see all available options on each script.
+
+For example, suppose you have the following files inside the `$APLATAM_DATA`
+directory:
+
+* Training rasters on `images/`
+* A settlements vector file `settlements.geojson`
+
+To prepare a dataset for training you would run:
+
+```
+docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam \
+  ap_prepare /data/images /data/settlements.geojson /data/my_dataset
+```
+
+When using `docker run` for the first time, it will pull the image
+automatically for you, so it is not neccessary to do `docker pull` first.
+
 ## Development
 
 First you will need to install the following packages.  On Debian-based distros
