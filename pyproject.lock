@@ -664,6 +664,26 @@ protobuf = ">=3.4.0"
 six = ">=1.10.0"
 numpy = ">=1.12.0"
 [[package]]
+name = "tensorflow"
+version = "1.8.0"
+description = "TensorFlow helps the tensors flow"
+category = "main"
+optional = false
+python-versions = "*"
+platform = "*"
+
+[package.dependencies]
+wheel = ">=0.26"
+grpcio = ">=1.8.6"
+termcolor = ">=1.1.0"
+tensorboard = ">=1.8.0,<1.9.0"
+protobuf = ">=3.4.0"
+six = ">=1.10.0"
+numpy = ">=1.13.3"
+gast = ">=0.2.0"
+astor = ">=0.6.0"
+absl-py = ">=0.1.6"
+[[package]]
 name = "tensorflow-gpu"
 version = "1.8.0"
 description = "TensorFlow helps the tensors flow"
@@ -743,7 +763,7 @@ platform = "*"
 [metadata]
 python-versions = "^3"
 platform = "*"
-content-hash = "414b236a0eb57d06e1574961bc207b7b2f7c4b432cf723b1e629a8beafe8ac39"
+content-hash = "630b061881dd48d3499e67bf0dc333562a6e47d1488b6980d34637f328b23ac4"
 
 [metadata.hashes]
 absl-py = [ "e0eb8358b549552b1cc5972350bc3e41dd0a926c15b3ff95ce60f3c78c80824c",]
@@ -806,6 +826,7 @@ singledispatch = [ "833b46966687b3de7f438c761ac475213e53b306740f1abfaa86e1d1aae5
 six = [ "832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb", "70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9",]
 snuggs = [ "4bea2fcefec819cc8b193d2c74e86ac448d64c3fff9df688220a9e3b2ad5af4f", "ef38fd4400b96f3999c928396102e65d3b0aa2f22bbc2c5fa49e151608368487", "e1d3c9364cec1b1b938627ebfc74f040be66711072d3ae754d844b9435f4940c",]
 tensorboard = [ "2651a4d9261a6593cb2c3514576e4bf25e273837c79e98f68a3cf51759f68725", "7776cc8bcfd0d07cd106e9e86c011ab8eca38c97b57f5433b9f0fd6bbf31a36e",]
+tensorflow = [ "1fc4eb267bc973f2a8466778ad0c6f110f8356373e534c8463a7bb9b6d86e5f0", "899e53e01efcc8e906b3d1f53fe6a6264edf5dfc275b32cadbc6f4e33dca78f7", "3087797a85610b756066df294f98e666e49f4fa60c6e1dbcf4b190b21397af71", "36a6671d39a3aec89cb4cce125e90305c3f8a69da16d2fb72eff40fe478e1de9", "68bda870c355aa64dc3dc377d5b9d13c829281467a7c3b95cb8529031d8f68b2", "dccc205e84cd33a240a601046e88eacefe12d677a1bbdf17f0ebafd1a7c84c70", "397c0766e166fb768613b1498a2a6f67eeea077425d234c0138d55e85408473d", "d345d296aeb05eeb50d9de43a1dcb66ceaba6a2bd603f58aeefaa07b2c1bfac1", "24c3d3f87dc6108f4de3bbb7f647bcd6f303f874721b176185f260adea88fe40", "373c637f9c4f06346b1b02e280b30517d262a1651b252ff889f7c22716ef4548", "de51f60021ea8160ea6d0340e827a26331cd549f6e7c470fba7ee83aeab4f818", "92801b9aebcc195d3b5a492d1d46330c47c11c6f0c0f7ab6b605da489482c64e",]
 tensorflow-gpu = [ "e84640b27d472507a28025fe4abc63c9799328e3d4f90ca81e7fc72aa70534a3", "95ceb6a52a0c7c244dca0d3197d0b585fbb02a5c503aea49e851c89178f80f80", "6cdd9ccb640618feea13ef8c6ad19ba1a381b4d6170accaa148c34e47479cd6e", "7ace502a621478513d89a186845ab319a46da588f01b783b887e504ec1168490", "37b8396c89e01140bd09736e31c06c25301af23c8c5d20b5103e5975910fa16a", "f680d57901e39ea0d4133f625ab0c3c05f0231e3deda860cb121ed10ae7b2ed7", "e8b7fad686de5c6fef3a537608e48d43d04aa10874af7679b657abf3a72f125f",]
 termcolor = [ "1d6d69ce66211143803fbc56652b41d73b4a400a2891d7bf7a1cdf4c02de613b",]
 tqdm = [ "224291ee0d8c52d91b037fd90806f48c79bcd9994d3b0abc9e44b946a908fccd", "77b8424d41b31e68f437c6dd9cd567aebc9a860507cb42fbd880a5f822d966fe",]
