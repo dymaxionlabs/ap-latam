@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/dymaxionlabs/ap-latam.svg?branch=master)](https://travis-ci.org/dymaxionlabs/ap-latam)
 [![codecov](https://codecov.io/gh/dymaxionlabs/ap-latam/branch/master/graph/badge.svg)](https://codecov.io/gh/dymaxionlabs/ap-latam)
+[![Join the chat at https://gitter.im/dymaxionlabs/ap-latam](https://badges.gitter.im/dymaxionlabs/ap-latam.svg)](https://gitter.im/dymaxionlabs/ap-latam?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This is the main repository of AP Latam project.
 
@@ -23,8 +24,13 @@ For more information on the website frontend, see the repository at
 ### Quick install and usage: Docker image
 
 If you have [Docker](https://www.docker.com/community-edition) installed on
-your machine, you can simply pull our image and run the scripts for training
-and detection.
+your machine, with NVIDIA CUDA installed and configured, you can simply pull
+our image and run the scripts for training and detection.
+
+Otherwise, follow the steps in this
+[tutorial](https://medium.com/google-cloud/jupyter-tensorflow-nvidia-gpu-docker-google-compute-engine-4a146f085f17)
+to install Docker, CUDA and `nvidia-docker`.  This has been tested on an Ubuntu
+16.04 LTS instance on Google Cloud Platform.
 
 For all scripts you will need to mount a data volume so that the scripts can
 read the input rasters and vector files, and write the resulting vector file.
@@ -36,11 +42,11 @@ data directory in your host machine, like this:
 export APLATAM_DATA=$HOME/aplatam-data
 ```
 
-Then, to use any of the scripts, you would have to run them using docker and
-mounting a volume to `$APLATAM_DATA` like this:
+Then, to use any of the scripts, you would have to run them using
+`nvidia-docker` and mounting a volume to `$APLATAM_DATA` like this:
 
 ```
-docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam SCRIPT_TO_RUN [ARGS...]
+nvidia-docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam SCRIPT_TO_RUN [ARGS...]
 ```
 
 where `SCRIPT_TO_RUN` is either `ap_prepare`, `ap_train` or `ap_detect` and
@@ -56,12 +62,13 @@ directory:
 To prepare a dataset for training you would run:
 
 ```
-docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam \
+nvidia-docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam \
   ap_prepare /data/images /data/settlements.geojson /data/my_dataset
 ```
 
-When using `docker run` for the first time, it will pull the image
-automatically for you, so it is not neccessary to do `docker pull` first.
+When using `[nvidia-]docker run` for the first time, it will pull the image
+automatically for you, so it is not neccessary to do `[nvidia-]docker pull`
+first.
 
 ## Development
 
@@ -69,7 +76,7 @@ First you will need to install the following packages.  On Debian-based distros
 run:
 
 ```
-sudo apt install libproj-dev gdal-bin build-essential libgdal-dev libspatialindex-dev
+sudo apt install libproj-dev gdal-bin build-essential libgdal-dev libspatialindex-dev python3-venv virtualenv
 ```
 
 This project is being managed by [Poetry](https://github.com/sdispater/poetry).
