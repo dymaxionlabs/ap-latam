@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "aplatam"
 version = "0.1.0"
-description = ""
+description = "Tool for detection of slums and informal settlements from satellite imagery"
 license = "BSD-2-Clause"
 readme = "README.md"
 homepage = "https://github.com/dymaxionlabs/ap-latam"
@@ -22,7 +22,7 @@ tqdm = "^4.23"
 keras = "^2.1"
 fiona = "1.7.11.post2"
 rasterio = {version = "*", allows-prereleases = true}
-tensorflow = "^1.8"
+tensorflow-gpu = "^1.8"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.5"
