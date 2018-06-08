@@ -46,7 +46,7 @@ Then, to use any of the scripts, you would have to run them using
 `nvidia-docker` and mounting a volume to `$APLATAM_DATA` like this:
 
 ```
-nvidia-docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam SCRIPT_TO_RUN [ARGS...]
+nvidia-docker run -ti -v $APLATAM_DATA:/data dymaxionlabs/ap-latam SCRIPT_TO_RUN [ARGS...]
 ```
 
 where `SCRIPT_TO_RUN` is either `ap_prepare`, `ap_train` or `ap_detect` and
@@ -62,7 +62,7 @@ directory:
 To prepare a dataset for training you would run:
 
 ```
-nvidia-docker run -v $APLATAM_DATA:/data dymaxionlabs/ap-latam \
+nvidia-docker run -ti -v $APLATAM_DATA:/data dymaxionlabs/ap-latam \
   ap_prepare /data/images /data/settlements.geojson /data/my_dataset
 ```
 
