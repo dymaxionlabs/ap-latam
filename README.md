@@ -70,6 +70,16 @@ When using `[nvidia-]docker run` for the first time, it will pull the image
 automatically for you, so it is not neccessary to do `[nvidia-]docker pull`
 first.
 
+#### `run_with_docker.sh`
+
+You can also use `run_with_docker.sh` to do the same:
+
+```
+export APLATAM_DATA=$HOME/data/
+./run_with_docker.sh ap_prepare /data/images /data/settlements.geojson /data/base_dataset
+...
+```
+
 ## Development
 
 First you will need to install the following packages.  On Debian-based distros
