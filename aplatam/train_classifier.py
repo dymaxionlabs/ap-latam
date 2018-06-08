@@ -7,6 +7,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, EarlyStopping
 import logging
+import json
 
 RESNET_50_LAYERS = 174
 
@@ -146,12 +147,3 @@ def freeze_layers(model, trainable_layers):
     for layer in model.layers:
         _logger.debug('Layer %s is trainable: %s', layer.name, layer.trainable)
     _logger.debug('Model summary: %s', model.summary())
-
-
-def write_geojson(shapes, output_path):
-    d = {'type': 'FeatureCollection', 'features': []}
-    for shape in shapes:
-        feat = {'type': 'Feature', 'geometry': mapping(shape)}
-        d['features'].append(feat)
-    with open(output_path, 'w') as f:
-        f.write(json.dumps(d))
