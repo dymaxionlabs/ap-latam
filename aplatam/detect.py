@@ -14,7 +14,9 @@ import keras
 from keras.preprocessing.image import ImageDataGenerator
 from aplatam.post_process import filter_features_by_mean_prob
 from aplatam.post_process import dissolve_overlapping_shapes
-from aplatam.util import write_geojson
+from aplatam.util import write_geojson, reproject_shape
+
+WGS84_CRS = {"init": "epsg:4326"}
 
 ShapeWithProps = namedtuple('ShapeWithProps', ['shape', 'props'])
 
@@ -49,7 +51,10 @@ def predict_image(fname,
             preds_b = preds[:, 0]
             for i in np.nonzero(preds_b > threshold)[0]:
                 _logger.info((window, float(preds_b[i])))
-                shape_with = ShapeWithProps(shape=window_box, props={})
+                reproject_window_box = reproject_shape(window_box, src.crs,
+                                                       WGS84_CRS)
+                shape_with = ShapeWithProps(
+                    shape=reproject_window_box, props={})
                 shape_with.props["prob"] = float(preds_b[i])
                 windows.append(shape_with)
         #if cur_windows:
@@ -97,7 +102,6 @@ def detect(*, model_file, input_dir, step_size, rescale_intensity, neighbours,
         step_size=step_size,
         rescale_intensity=rescale_intensity,
         threshold=threshold)
-
     shapes_with_props = filter_features_by_mean_prob(
         shapes_with_props, neighbours, mean_threshold)
     shapes_with = [shape_with.shape for shape_with in shapes_with_props]

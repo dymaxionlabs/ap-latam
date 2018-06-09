@@ -7,6 +7,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras import optimizers
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, EarlyStopping
 import logging
+import json
 
 RESNET_50_LAYERS = 174
 

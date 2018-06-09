@@ -10,6 +10,7 @@ from mock import call, patch
 from aplatam import __version__
 from aplatam.build_trainset import CnnTrainsetBuilder
 from aplatam.console.prepare import validate_rasters_band_count
+import glob
 
 
 @pytest.fixture
@@ -53,7 +54,24 @@ def test_cnn_trainset_builder():
         builder.build(tmpdir)
 
         metadata_path = os.path.join(tmpdir, 'metadata.json')
+        assert os.path.exists(metadata_path)
         with open(metadata_path) as f:
             metadata = json.load(f)
             assert isinstance(metadata, dict)
-            assert metadata['version'] == __version__
+            assert metadata["version"] == __version__
+            list_argument = [
+                'size', 'step_size', 'buffer_size', 'rescale_intensity',
+                'lower_cut', 'upper_cut'
+            ]
+            for name_argument in list_argument:
+                assert metadata[name_argument] == getattr(
+                    builder, name_argument)
+
+        test_t = os.path.join(tmpdir, "t")
+        assert os.path.exists(test_t)
+        test_f = os.path.join(tmpdir, "f")
+        assert os.path.exists(test_f)
+        t_jpg = glob.glob(os.path.join(test_t, '*.jpg'))
+        f_jpg = glob.glob(os.path.join(test_f, '*.jpg'))
+        assert len(t_jpg) > 0
+        assert len(f_jpg) > 0
