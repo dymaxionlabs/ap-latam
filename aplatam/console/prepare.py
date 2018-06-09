@@ -48,11 +48,11 @@ def parse_args(args):
     parser.add_argument('output_dir', help='path to output dataset directory')
 
     # Options
-    parser.add_argument("--size", type=int, default=128, help="window size")
+    parser.add_argument("--size", type=int, default=256, help="window size")
     parser.add_argument(
         "--step-size",
         type=int,
-        default=64,
+        default=128,
         help="step size for sliding window")
     parser.add_argument(
         "--buffer-size",
@@ -84,11 +84,7 @@ def parse_args(args):
         help=
         "upper cut of percentiles for cumulative count in intensity rescaling")
     parser.add_argument(
-        "--block-size",
-        type=int,
-        default=1,
-        help=
-        "block size multiplier")
+        "--block-size", type=int, default=1, help="block size multiplier")
 
     parser.add_argument(
         '--version',
