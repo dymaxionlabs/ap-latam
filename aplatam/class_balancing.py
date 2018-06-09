@@ -25,7 +25,6 @@ def split_dataset(files,
             true samples (e.g. 1.0 = 50% true 50% false)
 
     """
-    # FIXME Also do these asserts as validations when parsing arguments
     assert test_size >= 0.0 and test_size <= 1.0, (
         'test_size should be between 0.0 and 1.0')
     assert validation_size >= 0.0 and validation_size <= 1.0, (

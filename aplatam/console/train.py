@@ -10,12 +10,11 @@ import logging
 import os
 import random
 import sys
-import tempfile
 
 from aplatam import __version__
 from aplatam.class_balancing import split_dataset
-import json
 from aplatam.train_classifier import train
+from aplatam.util import read_metadata
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -103,12 +102,6 @@ def parse_args(args):
         const=logging.DEBUG)
 
     return parser.parse_args(args)
-
-
-def read_metadata(base_dataset_dir):
-    metadata_path = os.path.join(base_dataset_dir, "metadata.json")
-    with open(metadata_path) as f:
-        return json.load(f)
 
 
 def setup_logging(loglevel):

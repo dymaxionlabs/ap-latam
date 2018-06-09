@@ -8,7 +8,7 @@ import pyproj
 import rasterio
 import rtree
 from shapely.ops import transform
-from shapely.geometry import shape, box, mapping
+from shapely.geometry import mapping
 
 _logger = logging.getLogger(__name__)
 
@@ -22,8 +22,8 @@ def all_raster_files(dirname, ext='.tif'):
 def create_index(shapes):
     """Create an R-Tree index from a set of shapes"""
     index = rtree.index.Index()
-    for obj_id, shape in enumerate(shapes):
-        index.insert(obj_id, shape.bounds)
+    for shape_id, shape in enumerate(shapes):
+        index.insert(shape_id, shape.bounds)
     return index
 
 
@@ -62,17 +62,24 @@ def get_raster_crs(raster_path):
         return dataset.crs
 
 
+def read_metadata(input_dir):
+    metadata_path = os.path.join(input_dir, 'metadata.json')
+    with open(metadata_path) as src:
+        return json.load(src)
+
+
 def write_metadata(output_dir, **kwargs):
     """Write a dictionary as JSON to a file"""
     os.makedirs(output_dir, exist_ok=True)
-    with open(os.path.join(output_dir, 'metadata.json'), 'w') as f:
-        json.dump(kwargs, f)
+    metadata_path = os.path.join(output_dir, 'metadata.json')
+    with open(metadata_path, 'w') as dst:
+        json.dump(kwargs, dst)
 
 
 def write_geojson(shapes, output_path):
-    d = {'type': 'FeatureCollection', 'features': []}
+    dicc = {'type': 'FeatureCollection', 'features': []}
     for shape in shapes:
         feat = {'type': 'Feature', 'geometry': mapping(shape)}
-        d['features'].append(feat)
-    with open(output_path, 'w') as f:
-        f.write(json.dumps(d))
+        dicc['features'].append(feat)
+    with open(output_path, 'w') as dst:
+        dst.write(json.dumps(d))
