@@ -1,3 +1,6 @@
+# Reserved for storing datasets
+/data/
+
 # Virtual environments
 env/
 venv/
