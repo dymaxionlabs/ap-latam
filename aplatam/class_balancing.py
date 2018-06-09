@@ -2,6 +2,7 @@ import logging
 import os
 import random
 import shutil
+import warnings
 
 _logger = logging.getLogger(__name__)
 
@@ -34,8 +35,8 @@ def split_dataset(files,
     # First shuffle dataset
     true_files, false_files = files
 
-    assert len(true_files) < len(
-        false_files), 'there are less true samples than false samples'
+    if len(true_files) < len(false_files):
+        warnings.warn('There are less true samples than false samples')
 
     random.shuffle(true_files)
     random.shuffle(false_files)
