@@ -48,6 +48,6 @@ def filter_features_by_mean_prob(shapes_with_props, neigh, mean_threshold):
         shape_with_prop.props["prop_mean"] = prob_mean_filter(
             shape_id, shapes_with_props, ix, neigh)
     return [
-        shapes_with_prop for shapes_with_prop in shapes_with_props
+        shape_with_prop for shape_with_prop in shapes_with_props
         if shape_with_prop.props["prop_mean"] > mean_threshold
     ]
