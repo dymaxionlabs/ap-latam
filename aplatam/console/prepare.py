@@ -83,6 +83,12 @@ def parse_args(args):
         default=98,
         help=
         "upper cut of percentiles for cumulative count in intensity rescaling")
+    parser.add_argument(
+        "--block-size",
+        type=int,
+        default=1,
+        help=
+        "block size multiplier")
 
     parser.add_argument(
         '--version',
@@ -139,7 +145,8 @@ def main(args):
         buffer_size=args.buffer_size,
         rescale_intensity=args.rescale_intensity,
         lower_cut=args.lower_cut,
-        upper_cut=args.upper_cut)
+        upper_cut=args.upper_cut,
+        block_size=args.block_size)
     _logger.info('Options: %s', opts)
 
     _logger.info('Collect all rasters from %s', args.rasters_dir)
