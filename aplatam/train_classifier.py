@@ -1,76 +1,70 @@
-import glob
-import os
-from keras import applications
-from keras.layers import Dropout, Flatten, Dense, GlobalAveragePooling2D
-from keras.models import Sequential, Model
-from keras.preprocessing.image import ImageDataGenerator
-from keras import optimizers
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard, EarlyStopping
+from glob import glob
 import logging
-import json
+import os
+
+from keras import applications, optimizers
+from keras.callbacks import EarlyStopping
+from keras.layers import Dense, Dropout, Flatten
+from keras.models import Model
+from keras.preprocessing.image import ImageDataGenerator
 
 RESNET_50_LAYERS = 174
 
 _logger = logging.getLogger(__name__)
 
 
-def train(trainable_layers, output_model, batch_size, epochs, size,
-          dataset_dir):
+def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
+          epochs, size):
 
-    train_data_dir = os.path.join(dataset_dir, "train")
+    train_data_dir = os.path.join(dataset_dir, 'train')
+    validation_data_dir = os.path.join(dataset_dir, 'validation')
 
-    train_files = glob.glob(os.path.join(train_data_dir, "**", "*.jpg"))
-
-    validation_data_dir = os.path.join(dataset_dir, "validation")
-
-    validation_files = glob.glob(
-        os.path.join(validation_data_dir, "**", "*.jpg"))
+    train_files = glob(os.path.join(train_data_dir, '**', '*.jpg'))
+    validation_files = glob(os.path.join(validation_data_dir, '**', '*.jpg'))
 
     nb_train_samples = len(train_files)
-
     nb_validation_samples = len(validation_files)
 
     img_width, img_height = size, size
-    #nb_true_train_files = len(glob.glob(os.path.join('data_keras/','train_hires_balanced/vya', '*.jpg')))
-    #class_weights = { 0: 1., 1: round((nb_train_samples - nb_true_train_files)/nb_true_train_files)}
-    #print(class_weights)
 
-    model = build_resnet50_model(img_width, img_height)
+    assert size >= 197, \
+        'image size must be at least 197x197, but was {size}x{size}'.format(size=size)
 
-    freeze_layers(model, trainable_layers)
+    # Build model using ResNet-50 as base input
+    base_model = build_resnet50_model(img_width, img_height)
+    freeze_layers(base_model, trainable_layers)
+    outputs = add_custom_layers(base_model)
+    model = Model(inputs=base_model.input, outputs=outputs)
+    compile_model(model)
 
-    predictions = adding_custom_ayers(model)
-
-    # creating the final model
-    model_final = Model(inputs=model.input, outputs=predictions)
-
-    compile_model(model_final)
-
+    # Prepare data generators for training and test sets
     train_datagen = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True)
-
     test_datagen = ImageDataGenerator(rescale=1. / 255, horizontal_flip=True)
 
     train_generator = train_data_generator(train_datagen, train_data_dir,
                                            img_height, img_width, batch_size)
-
     validation_generator = validation_data_generator(
         test_datagen, validation_data_dir, img_height, img_width)
 
-    # Save the model according to the conditions
-    #checkpoint = ModelCheckpoint("vgg16_1.h5",
-    #        monitor = 'val_acc',
-    #        verbose = 1,
-    #        save_best_only = True,
-    #        save_weights_only = False,
-    #        mode = 'auto',
-    #        period = 1)
-    early = EarlyStopping(
+    # Configure early stopping to monitor validation accuracy
+    early_stopping = EarlyStopping(
         monitor='val_acc', min_delta=0, patience=10, verbose=1, mode='auto')
 
-    # Train the model
-    train_model(model_final, train_generator, nb_train_samples, batch_size,
-                epochs, validation_generator, nb_validation_samples, early,
-                trainable_layers, output_model)
+    # Start training model
+    train_model(
+        model,
+        train_generator=train_generator,
+        train_samples=nb_train_samples,
+        validation_generator=validation_generator,
+        validation_samples=nb_validation_samples,
+        batch_size=batch_size,
+        epochs=epochs,
+        early_stopping=early_stopping)
+    _logger.info('Training completed')
+
+    # Finally, save model to a file
+    model.save(output_model_file)
+    _logger.info('Model saved as %s', output_model_file)
 
 
 def build_resnet50_model(img_width, img_height):
@@ -81,22 +75,16 @@ def build_resnet50_model(img_width, img_height):
         input_shape=(img_width, img_height, 3))
 
 
-def train_model(model_final, train_generator, nb_train_samples, batch_size,
-                epochs, validation_generator, nb_validation_samples, early,
-                trainable_layers, output_model):
-    """Train the model"""
-    model_final.fit_generator(
+def train_model(model, *, train_generator, validation_generator, train_samples,
+                validation_samples, batch_size, epochs, early_stopping):
+    """Train model"""
+    model.fit_generator(
         train_generator,
-        steps_per_epoch=nb_train_samples // batch_size,
+        steps_per_epoch=train_samples // batch_size,
         epochs=epochs,
-        #class_weight = class_weights,
         validation_data=validation_generator,
-        validation_steps=nb_validation_samples // batch_size,
-        callbacks=[early])
-
-    # Finally, save model
-    model_final.save(output_model)
-    print('Done with {} layers'.format(trainable_layers))
+        validation_steps=validation_samples // batch_size,
+        callbacks=[early_stopping])
 
 
 def validation_data_generator(test_datagen, validation_data_dir, img_height,
@@ -120,22 +108,22 @@ def train_data_generator(train_datagen, train_data_dir, img_height, img_width,
     return train_generator
 
 
-def compile_model(model_final):
-    """compile the model"""
-    model_final.compile(
+def compile_model(model):
+    """Compile model by setting optimizer and loss function"""
+    model.compile(
         loss='binary_crossentropy',
         optimizer=optimizers.SGD(lr=0.0001, momentum=0.9),
         metrics=['accuracy'])
 
 
-def adding_custom_ayers(model):
+def add_custom_layers(model):
     """Adding custom Layers"""
-    x = model.output
-    x = Flatten()(x)
-    x = Dense(1024, activation="relu")(x)
-    x = Dropout(0.5)(x)
-    predictions = Dense(1, activation="sigmoid")(x)
-    return predictions
+    model = model.output
+    model = Flatten()(model)
+    model = Dense(1024, activation='relu')(model)
+    model = Dropout(0.5)(model)
+    model = Dense(1, activation='sigmoid')(model)
+    return model
 
 
 def freeze_layers(model, trainable_layers):

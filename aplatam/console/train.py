@@ -150,8 +150,14 @@ def main(args):
         validation_size=args.validation_size,
         balancing_multiplier=args.balancing_multiplier)
 
-    train(args.trainable_layers, args.output_model, args.batch_size,
-          args.epochs, size, args.dataset_dir)
+    # Train and save model
+    train(
+        args.output_model,
+        args.dataset_dir,
+        trainable_layers=args.trainable_layers,
+        batch_size=args.batch_size,
+        epochs=args.epochs,
+        size=size)
 
     _logger.info('Done')
 
