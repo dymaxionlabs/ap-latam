@@ -24,6 +24,7 @@ fiona = "1.7.11.post2"
 rasterio = {version = "*", allows-prereleases = true}
 tensorflow-gpu = "^1.8"
 tensorflow = "^1.8"
+dask-rasterio = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.5"
