@@ -22,6 +22,8 @@ __license__ = "new-bsd"
 
 _logger = logging.getLogger(__name__)
 
+DEFAULT_MODEL_FILENAME = 'model.h5'
+
 
 def parse_args(args):
     """
@@ -42,14 +44,17 @@ def parse_args(args):
     parser.add_argument(
         'base_dataset_dir', help='directory containing the prepared dataset')
 
-    parser.add_argument('dataset_dir', help='path to temporary directory')
-
     # Options
     parser.add_argument(
         '-o',
         '--output-model',
-        default='model.h5',
-        help='filename for output model')
+        default=None,
+        help=('filename for output model. '
+              'Default: DATASET_DIR/model.h5'))
+    parser.add_argument(
+        '--dataset-dir',
+        help=('directory that will contain train/validation/test sets. '
+              'Default is set to BASE_DATASET_DIR'))
 
     parser.add_argument(
         '--seed', type=int, help='seed number for the random number generator')
@@ -130,6 +135,17 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
+
+    # Set default dataset path, if not set
+    dataset_dir = args.dataset_dir if args.dataset_dir else args.base_dataset_dir
+
+    # Set default output model path, if not set
+    if args.output_model:
+        output_model = args.output_model
+    else:
+        output_model = os.path.join(dataset_dir, DEFAULT_MODEL_FILENAME)
+
+    # Read metadata to obtain image size
     dataset_opts = read_metadata(args.base_dataset_dir)
     size = dataset_opts["size"]
 
@@ -145,15 +161,15 @@ def main(args):
     # Split dataset into train, validation and test sets
     split_dataset(
         (true_files, false_files),
-        args.dataset_dir,
+        dataset_dir,
         test_size=args.test_size,
         validation_size=args.validation_size,
         balancing_multiplier=args.balancing_multiplier)
 
     # Train and save model
     train(
-        args.output_model,
-        args.dataset_dir,
+        output_model,
+        dataset_dir,
         trainable_layers=args.trainable_layers,
         batch_size=args.batch_size,
         epochs=args.epochs,
