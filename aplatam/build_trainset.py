@@ -12,7 +12,7 @@ import dask_rasterio
 
 from aplatam import __version__
 from aplatam.util import (create_index, get_raster_crs, reproject_shape,
-                          sliding_windows, window_to_bounds, write_metadata)
+                          sliding_windows, write_metadata)
 
 _logger = logging.getLogger(__name__)
 
@@ -105,7 +105,8 @@ class CnnTrainsetBuilder:
             return shapes
 
     def _calculate_percentiles(self, raster):
-        rgb_img = dask_rasterio.read_raster(raster, band=(1,2,3), block_size=self.block_size)
+        rgb_img = dask_rasterio.read_raster(
+            raster, band=(1, 2, 3), block_size=self.block_size)
         return tuple(np.percentile(rgb_img, (self.lower_cut, self.upper_cut)))
 
     def _write_window_tiles(self, shapes, output_dir, raster):
@@ -119,23 +120,28 @@ class CnnTrainsetBuilder:
             percentiles = None
 
         with rasterio.open(raster) as src:
-            for window in sliding_windows(self.size, self.step_size,
-                                          src.shape):
-                window_box = box(*window_to_bounds(window, src.transform))
+            windows = sliding_windows(
+                self.size,
+                self.step_size,
+                height=src.shape[0],
+                width=src.shape[1])
+
+            for window in windows:
+                window_box = box(*src.window_bounds(window))
+
                 matching_shapes = self._intersect_window(
                     shapes, index, window_box)
 
-                if len(matching_shapes) > 0:
-                    _logger.info('Matching window at %s, containing %d shapes', window, len(matching_shapes))
-                try:
-                    img_class = self._image_class_string(
-                        matching_shapes, window_box)
-                    win_fname = self._prepare_img_filename(raster, window)
-                    img_dir = self._create_class_dir(output_dir, img_class)
-                    rgb = self._extract_img(src, window, percentiles=percentiles)
-                    self._save_jpg(img_dir, win_fname, rgb)
-                except RuntimeError:
-                    pass
+                if matching_shapes:
+                    _logger.info('Matching window at %s, containing %d shapes',
+                                 window, len(matching_shapes))
+
+                img_class = self._image_class_string(matching_shapes,
+                                                     window_box)
+                win_fname = self._prepare_img_filename(raster, window)
+                img_dir = self._create_class_dir(output_dir, img_class)
+                rgb = self._extract_img(src, window, percentiles=percentiles)
+                self._save_jpg(img_dir, win_fname, rgb)
 
     def _save_jpg(self, img_dir, win_fname, rgb):
         """Save .jpg image from raster"""
@@ -145,13 +151,11 @@ class CnnTrainsetBuilder:
     def _prepare_img_filename(self, raster, window):
         """Prepare img filename"""
         fname, _ = os.path.splitext(os.path.basename(raster))
-        win_fname = '{}__{}_{}.jpg'.format(fname, window[0][0], window[1][0])
+        win_fname = '{fname}__{i}_{j}.jpg'.format(
+            fname=fname, i=window.row_off, j=window.col_off)
         return win_fname
 
-    def _extract_img(self,
-                     src,
-                     window,
-                     percentiles=None):
+    def _extract_img(self, src, window, percentiles=None):
         """Extract image from raster and preprocess"""
         rgb = np.dstack([src.read(b, window=window) for b in range(1, 4)])
         if self.rescale_intensity:
