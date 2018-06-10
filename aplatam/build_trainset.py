@@ -2,17 +2,19 @@
 import logging
 import os
 
+import dask_rasterio
 import fiona
 import numpy as np
 import rasterio
+import rasterio.mask
 from shapely.geometry import box, shape
 from skimage import exposure
 from skimage.io import imsave
-import dask_rasterio
 
 from aplatam import __version__
-from aplatam.util import (create_index, get_raster_crs, reproject_shape,
-                          sliding_windows, write_metadata)
+from aplatam.util import (get_raster_crs, reproject_shape, sliding_windows,
+                          write_metadata)
+from aplatam.class_balancing import split_dataset
 
 _logger = logging.getLogger(__name__)
 
@@ -36,27 +38,42 @@ class CnnTrainsetBuilder:
         step_size {int} -- how many pixels to slide window
 
     Keyword Arguments:
+        test_size {float} -- proportion of test set from total of true samples
+        validation_size {float} -- proportion of validation set from total of
+            true samples (default: {0.25})
+        balancing_multiplier {float} -- proportion of false samples w.r.t
+            true samples (e.g. 1.0 = 50% true 50% false) (default: {0.25})
         buffer_size {float} -- size of buffer (default: {0})
-        rescale_intensity {bool} -- whether to rescale images intensity (default: {True})
+        rescale_intensity {bool} -- whether to rescale images intensity
+            (default: {True})
         lower_cut {float} -- lower cut of intensity rescale (default: {2})
         upper_cut {float} -- upper cut of intensity rescale (default: {98})
         block_size {int} -- block size multiplier (default: {1})
 
     """
 
+    DATASET_DIRNAMES = ('train', 'validation', 'test')
+
     def __init__(self,
                  rasters,
                  vector,
+                 test_size=0.25,
+                 validation_size=0.25,
+                 balancing_multiplier=1,
                  buffer_size=0,
                  rescale_intensity=True,
                  lower_cut=2,
                  upper_cut=98,
                  block_size=1,
+                 rasters_contour=None,
                  *,
                  size,
                  step_size):
         self.rasters = rasters
         self.vector = vector
+        self.test_size = test_size
+        self.validation_size = validation_size
+        self.balancing_multiplier = balancing_multiplier
         self.size = size
         self.step_size = step_size
         self.buffer_size = buffer_size
@@ -64,6 +81,7 @@ class CnnTrainsetBuilder:
         self.lower_cut = lower_cut
         self.upper_cut = upper_cut
         self.block_size = block_size
+        self.rasters_contour = rasters_contour
 
     def build(self, output_dir):
         """Build a trainset and store it on output_dir
@@ -76,17 +94,135 @@ class CnnTrainsetBuilder:
         _logger.info('Total shapes: %d', len(shapes))
         _logger.info('Vector CRS is %s', vector_crs)
 
+        rasters_contour_shape = None
+        if self.rasters_contour:
+            _logger.info('Load raster contour polygon shape from %s',
+                         self.rasters_contour)
+            with fiona.open(self.rasters_contour) as src:
+                rasters_contour_shape = [
+                    shape(feature['geometry']) for feature in src
+                ][0]
+                rasters_contour_crs = src.crs
+
+        class_dirs = [
+            os.path.join(output_dir, dirname)
+            for dirname in self.DATASET_DIRNAMES
+        ]
+        for path in class_dirs:
+            _logger.info('Create directory %s', path)
+            os.makedirs(path, exist_ok=True)
+
         for raster in self.rasters:
             _logger.info('Processing raster %s', raster)
 
             raster_crs = get_raster_crs(raster)
             _logger.info('Raster CRS is %s', raster_crs)
 
-            new_shapes = self._reproject_shapes(shapes, vector_crs, raster_crs)
+            if self.rescale_intensity:
+                percentiles = self._calculate_percentiles(raster)
+            else:
+                percentiles = None
+
+            if vector_crs != raster_crs:
+                _logger.info('Reproject shapes from %s to %s', vector_crs,
+                             raster_crs)
+                new_shapes = self._reproject_shapes(shapes, vector_crs,
+                                                    raster_crs)
+            else:
+                new_shapes = shapes
+
             new_shapes = self._apply_buffer(new_shapes)
 
-            self._write_window_tiles(new_shapes, output_dir, raster)
+            new_shapes = self._intersection_with_raster_extent(
+                new_shapes, raster)
+
+            _logger.info(
+                'There are %d shapes inside current raster extent (total %d)',
+                len(new_shapes), len(shapes))
+
+            if self.rasters_contour and rasters_contour_shape != raster_crs:
+                _logger.info('Reproject raster contour shape from %s to %s',
+                             vector_crs, raster_crs)
+                new_rasters_contour_shape = reproject_shape(
+                    rasters_contour_shape, rasters_contour_crs, raster_crs)
+            else:
+                new_rasters_contour_shape = rasters_contour_shape
+
+            self._extract_samples(
+                raster=raster,
+                shapes=new_shapes,
+                output_dir=output_dir,
+                percentiles=percentiles,
+                rasters_polygon=new_rasters_contour_shape)
+
         self._write_metadata(output_dir)
+
+    def _intersection_with_raster_extent(self, shapes, raster):
+        with rasterio.open(raster) as src:
+            raster_bbox = box(*src.bounds)
+        return [shape for shape in shapes if raster_bbox.contains(shape)]
+
+    def _extract_samples(self,
+                         raster,
+                         shapes,
+                         output_dir,
+                         percentiles=None,
+                         rasters_polygon=None):
+
+        with rasterio.open(raster) as src:
+            windows = sliding_windows(
+                self.size, self.step_size, height=src.height, width=src.width)
+            windows_and_boxes = [(w, box(*src.window_bounds(w)))
+                                 for w in windows]
+            _logger.info('Total windows: %d', len(windows_and_boxes))
+
+            if rasters_polygon:
+                windows_and_boxes = [(w, b) for w, b in windows_and_boxes
+                                     if rasters_polygon.intersection(b)]
+                _logger.info(
+                    'Total windows (after filtering with raster contour shape): %d',
+                    len(windows_and_boxes))
+
+            matching_windows = []
+            non_matching_windows = []
+            for w, b in windows_and_boxes:
+                if any(b.intersection(shape) for shape in shapes):
+                    matching_windows.append(w)
+                else:
+                    non_matching_windows.append(w)
+
+        _logger.info('Total matching windows: %d', len(matching_windows))
+        _logger.info('Total non-matching windows: %d',
+                     len(non_matching_windows))
+
+        # Split dataset
+        datasets = split_dataset(
+            matching_windows,
+            non_matching_windows,
+            test_size=self.test_size,
+            validation_size=self.validation_size,
+            balancing_multiplier=self.balancing_multiplier)
+
+        # Extract and store images
+        for i, windows in enumerate(datasets):
+            dirname = self.DATASET_DIRNAMES[i]
+            for j, cls_name in enumerate(('t', 'f')):
+                # Create directory
+                os.makedirs(
+                    os.path.join(output_dir, dirname, cls_name), exist_ok=True)
+                # Extract image
+                self._extract_images_from_windows(
+                    windows[j], raster, percentiles,
+                    os.path.join(output_dir, dirname, cls_name))
+
+    def _extract_images_from_windows(self, matching_windows, raster,
+                                     percentiles, output_dir):
+        with rasterio.open(raster) as src:
+            for window in matching_windows:
+                fname = self._prepare_img_filename(raster, window)
+                rgb = self._extract_img(src, window, percentiles=percentiles)
+                if not exposure.is_low_contrast(rgb):
+                    self._save_jpg(output_dir, fname, rgb)
 
     def _read_shapes(self):
         """Read features from the vector file and return their geometry shapes"""
@@ -100,6 +236,8 @@ class CnnTrainsetBuilder:
     def _apply_buffer(self, shapes):
         """Apply a fixed-sized buffer to all shapes"""
         if self.buffer_size != 0:
+            _logger.info('Apply fixed-sized buffer of %d to all shapes',
+                         self.buffer_size)
             return [s.buffer(self.buffer_size) for s in shapes]
         else:
             return shapes
@@ -108,40 +246,6 @@ class CnnTrainsetBuilder:
         rgb_img = dask_rasterio.read_raster(
             raster, band=(1, 2, 3), block_size=self.block_size)
         return tuple(np.percentile(rgb_img, (self.lower_cut, self.upper_cut)))
-
-    def _write_window_tiles(self, shapes, output_dir, raster):
-        """Extract windows of +size+ by sliding it +step_size+ on a raster, and write files"""
-        # Create R-Tree index with shapes to speed up intersection operation
-        index = create_index(shapes)
-
-        if self.rescale_intensity:
-            percentiles = self._calculate_percentiles(raster)
-        else:
-            percentiles = None
-
-        with rasterio.open(raster) as src:
-            windows = sliding_windows(
-                self.size,
-                self.step_size,
-                height=src.shape[0],
-                width=src.shape[1])
-
-            for window in windows:
-                window_box = box(*src.window_bounds(window))
-
-                matching_shapes = self._intersect_window(
-                    shapes, index, window_box)
-
-                if matching_shapes:
-                    _logger.info('Matching window at %s, containing %d shapes',
-                                 window, len(matching_shapes))
-
-                img_class = self._image_class_string(matching_shapes,
-                                                     window_box)
-                win_fname = self._prepare_img_filename(raster, window)
-                img_dir = self._create_class_dir(output_dir, img_class)
-                rgb = self._extract_img(src, window, percentiles=percentiles)
-                self._save_jpg(img_dir, win_fname, rgb)
 
     def _save_jpg(self, img_dir, win_fname, rgb):
         """Save .jpg image from raster"""
@@ -161,60 +265,6 @@ class CnnTrainsetBuilder:
         if self.rescale_intensity:
             rgb = exposure.rescale_intensity(rgb, in_range=percentiles)
         return rgb
-
-    def _create_class_dir(self, path, img_class):
-        """Create class directory"""
-        img_dir = os.path.join(path, img_class)
-        os.makedirs(img_dir, exist_ok=True)
-        return img_dir
-
-    def _image_class_string(self, matching_shapes, window_box):
-        """Return image class string
-
-        Arguments:
-            matching_shapes {list(shape)} -- list of matching shapes
-            window_box {shape} -- window box
-
-        Returns:
-            string -- image class string
-
-        """
-        if self._is_image_positive(matching_shapes, window_box):
-            img_class = 't'
-        else:
-            img_class = 'f'
-        return img_class
-
-    def _is_image_positive(self, matching_shapes, window_box):
-        """Decide whether image is a true sample
-
-        Arguments:
-            matching_shapes {list(shape)} -- list of matching shapes
-            window_box {shape} -- window box
-
-        Returns:
-            bool -- True if image is a true sample or not
-
-        """
-        return matching_shapes and any(
-            s.intersection(window_box).area > 0.0 for s in matching_shapes)
-
-    def _intersect_window(self, shapes, index, window_box):
-        """Get shapes whose bounding boxes intersect with window box
-
-        Arguments:
-            shapes {list(shape)} -- list of shapes
-            index {index} -- R-Tree index object
-            window_box {shape} -- window box shape
-
-        Returns:
-            list(shape) -- list of shapes that intersect with window
-
-        """
-        matching_shapes = [
-            shapes[s_id] for s_id in index.intersection(window_box.bounds)
-        ]
-        return matching_shapes
 
     def _write_metadata(self, output_dir):
         write_metadata(
