@@ -1,7 +1,10 @@
+import tempfile
+
 import pytest
 from mock import call, patch
 
 from aplatam import __version__
+import aplatam.console.prepare as ap_prepare
 from aplatam.console.prepare import validate_rasters_band_count
 
 
@@ -33,3 +36,11 @@ def test_validate_rasters_band_count_fail(mock_func, some_rasters):
     with pytest.raises(RuntimeError):
         assert validate_rasters_band_count(some_rasters)
     mock_func.assert_has_calls([call('a.tif'), call('b.tif'), call('c.tif')])
+
+
+def test_run_script_default_arguments():
+    with tempfile.TemporaryDirectory(prefix='aplatam_test_prepare') as tmpdir:
+        ap_prepare.main(['tests/fixtures/', 'tests/fixtures/settlements.geojson', tmpdir])
+
+        # TODO
+        assert True

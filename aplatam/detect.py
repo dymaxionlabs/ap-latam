@@ -1,20 +1,21 @@
-import rasterio as rio
-import logging
-_logger = logging.getLogger(__name__)
 import glob
-import numpy as np
-from aplatam.old.util import window_to_bounds, sliding_windows
-from skimage import exposure
-from shapely.geometry import shape, box, mapping
-import os
-import tqdm
 import json
+import logging
+import os
 from collections import namedtuple
+
 import keras
-from keras.preprocessing.image import ImageDataGenerator
-from aplatam.post_process import filter_features_by_mean_prob
-from aplatam.post_process import dissolve_overlapping_shapes
-from aplatam.util import write_geojson, reproject_shape
+import numpy as np
+import rasterio as rio
+import tqdm
+from shapely.geometry import box, mapping
+from skimage import exposure
+
+from aplatam.post_process import (dissolve_overlapping_shapes,
+                                  filter_features_by_mean_prob)
+from aplatam.util import (reproject_shape, sliding_windows, write_geojson)
+
+_logger = logging.getLogger(__name__)
 
 WGS84_CRS = {"init": "epsg:4326"}
 
@@ -33,12 +34,13 @@ def predict_image(fname,
         step_size = size
 
     with rio.open(fname) as src:
-        #imgs = []
-        windows = []
+        matching_windows = []
 
-        for window in sliding_windows(size, step_size, src.shape):
+        windows = sliding_windows(
+            size, step_size, height=src.shape[0], width=src.shape[1])
 
-            window_box = box(*window_to_bounds(window, src.transform))
+        for window in windows:
+            window_box = box(*src.window_bounds(window))
 
             img = np.dstack([src.read(b, window=window) for b in range(1, 4)])
 
@@ -49,6 +51,7 @@ def predict_image(fname,
             img = img / 255.
             preds = model.predict(np.array([img]))
             preds_b = preds[:, 0]
+
             for i in np.nonzero(preds_b > threshold)[0]:
                 _logger.info((window, float(preds_b[i])))
                 reproject_window_box = reproject_shape(window_box, src.crs,
@@ -56,13 +59,9 @@ def predict_image(fname,
                 shape_with = ShapeWithProps(
                     shape=reproject_window_box, props={})
                 shape_with.props["prob"] = float(preds_b[i])
-                windows.append(shape_with)
-        #if cur_windows:
-        #    name, _ = os.path.splitext(os.path.basename(fname))
-        #    output = '/tmp/{}_windows.geojson'.format(name)
-        #    write_geojson(cur_windows, output)
+                matching_windows.append(shape_with)
 
-        return windows
+        return matching_windows
 
 
 def predict_images(input_dir, model, size, **kwargs):
@@ -74,24 +73,23 @@ def predict_images(input_dir, model, size, **kwargs):
     _logger.info("Done! Found %d matching windows  on all files ",
                  (len(all_windows)))
     return all_windows
-    #print('{} written'.format(output))
 
 
 def build_geojson(shapes_and_roces):
-    d = {'type': 'FeatureCollection', 'features': []}
+    dicc = {'type': 'FeatureCollection', 'features': []}
     for shape in shapes_and_roces:
         feat = {
             'type': 'Feature',
             'geometry': mapping(shape),
             "properties": []
         }
-        d['features'].append(feat)
-    return json.dumps(d)
+        dicc['features'].append(feat)
+    return json.dumps(dicc)
 
 
 def detect(*, model_file, input_dir, step_size, rescale_intensity, neighbours,
            threshold, output, mean_threshold):
-    datagen = ImageDataGenerator(rescale=1. / 255)
+
     model = keras.models.load_model(model_file)
     img_size = model.input_shape[1]
 
