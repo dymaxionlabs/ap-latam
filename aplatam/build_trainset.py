@@ -12,8 +12,8 @@ from skimage import exposure
 from skimage.io import imsave
 
 from aplatam import __version__
-from aplatam.util import (get_raster_crs, reproject_shape, sliding_windows,
-                          write_metadata)
+from aplatam.util import (create_index, get_raster_crs, reproject_shape,
+                          sliding_windows, write_metadata)
 from aplatam.class_balancing import split_dataset
 
 _logger = logging.getLogger(__name__)
@@ -169,6 +169,8 @@ class CnnTrainsetBuilder:
                          percentiles=None,
                          rasters_polygon=None):
 
+        index = create_index(shapes)
+
         with rasterio.open(raster) as src:
             windows = sliding_windows(
                 self.size, self.step_size, height=src.height, width=src.width)
@@ -186,7 +188,11 @@ class CnnTrainsetBuilder:
             matching_windows = []
             non_matching_windows = []
             for w, b in windows_and_boxes:
-                if any(b.intersection(shape) for shape in shapes):
+                matching_shapes = [
+                    shapes[i] for i in index.intersection(b.bounds)
+                ]
+                if matching_shapes and any(
+                        shape.intersection(b) for shape in matching_shapes):
                     matching_windows.append(w)
                 else:
                     non_matching_windows.append(w)
