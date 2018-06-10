@@ -49,9 +49,9 @@ Then, to use any of the scripts, you would have to run them using
 nvidia-docker run -ti -v $APLATAM_DATA:/data dymaxionlabs/ap-latam SCRIPT_TO_RUN [ARGS...]
 ```
 
-where `SCRIPT_TO_RUN` is either `ap_prepare`, `ap_train` or `ap_detect` and
-`[ARGS...]` the command line arguments of the specified script. You can run
-with `--help` to see all available options on each script.
+where `SCRIPT_TO_RUN` is either `ap_train` or `ap_detect` and `[ARGS...]` the
+command line arguments of the specified script. You can run with `--help` to
+see all available options on each script.
 
 For example, suppose you have the following files inside the `$APLATAM_DATA`
 directory:
@@ -59,11 +59,11 @@ directory:
 * Training rasters on `images/`
 * A settlements vector file `settlements.geojson`
 
-To prepare a dataset for training you would run:
+To prepare a dataset and train a model you would run:
 
 ```
 nvidia-docker run -ti -v $APLATAM_DATA:/data dymaxionlabs/ap-latam \
-  ap_prepare /data/images /data/settlements.geojson /data/my_dataset
+  ap_train /data/images /data/settlements.geojson /data/dataset
 ```
 
 When using `[nvidia-]docker run` for the first time, it will pull the image
@@ -76,7 +76,7 @@ You can also use `run_with_docker.sh` to do the same:
 
 ```
 export APLATAM_DATA=$HOME/data/
-./run_with_docker.sh ap_prepare /data/images /data/settlements.geojson /data/base_dataset
+./run_with_docker.sh ap_train /data/images /data/settlements.geojson /data/dataset
 ...
 ```
 

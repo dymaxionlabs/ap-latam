@@ -11,10 +11,13 @@ import os
 import random
 import sys
 
+import rasterio
+
 from aplatam import __version__
+from aplatam.build_trainset import CnnTrainsetBuilder
 from aplatam.class_balancing import split_dataset
 from aplatam.train_classifier import train
-from aplatam.util import read_metadata
+from aplatam.util import all_raster_files
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -22,6 +25,10 @@ __license__ = "new-bsd"
 
 _logger = logging.getLogger(__name__)
 
+# Number of bands that all rasters must have
+BAND_COUNT = 4
+
+# Default output model filename
 DEFAULT_MODEL_FILENAME = 'model.h5'
 
 
@@ -38,11 +45,16 @@ def parse_args(args):
     """
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        description='Train a detection model from an already prepared dataset')
+        description=('Prepare a dataset from a set of preprocessed rasters '
+                     'and a vector file of polygons and train a detection '
+                     'model.'))
 
     # Mandatory arguments
     parser.add_argument(
-        'base_dataset_dir', help='directory containing the prepared dataset')
+        'rasters_dir', help='directory containing raster images')
+    parser.add_argument('vector', help='vector file of training polygons')
+    parser.add_argument(
+        'output_dir', help='directory of output training dataset')
 
     # Options
     parser.add_argument(
@@ -50,14 +62,47 @@ def parse_args(args):
         '--output-model',
         default=None,
         help=('filename for output model. '
-              'Default: DATASET_DIR/model.h5'))
-    parser.add_argument(
-        '--dataset-dir',
-        help=('directory that will contain train/validation/test sets. '
-              'Default is set to BASE_DATASET_DIR'))
+              'Default: OUTPUT_DIR/model.h5'))
 
     parser.add_argument(
         '--seed', type=int, help='seed number for the random number generator')
+    parser.add_argument("--size", type=int, default=256, help="window size")
+    parser.add_argument(
+        "--step-size",
+        type=int,
+        default=128,
+        help="step size for sliding window")
+    parser.add_argument(
+        "--buffer-size",
+        type=int,
+        default=0,
+        help=
+        "if buffer_size > 0, polygons are expanded with a fixed-sized buffer")
+    parser.add_argument(
+        "--rescale-intensity",
+        dest='rescale_intensity',
+        default=True,
+        action='store_true',
+        help="Rescale intensity")
+    parser.add_argument(
+        "--no-rescale-intensity",
+        dest='rescale_intensity',
+        action='store_false',
+        help="Do not rescale intensity")
+    parser.add_argument(
+        "--lower-cut",
+        type=int,
+        default=2,
+        help=
+        "Lower cut of percentiles for cumulative count in intensity rescaling")
+    parser.add_argument(
+        "--upper-cut",
+        type=int,
+        default=98,
+        help=
+        "upper cut of percentiles for cumulative count in intensity rescaling")
+    parser.add_argument(
+        "--block-size", type=int, default=1, help="block size multiplier")
     parser.add_argument(
         "--test-size",
         type=float,
@@ -136,18 +181,29 @@ def main(args):
     args = parse_args(args)
     setup_logging(args.loglevel)
 
-    # Set default dataset path, if not set
-    dataset_dir = args.dataset_dir if args.dataset_dir else args.base_dataset_dir
-
     # Set default output model path, if not set
     if args.output_model:
         output_model = args.output_model
     else:
-        output_model = os.path.join(dataset_dir, DEFAULT_MODEL_FILENAME)
+        output_model = os.path.join(args.output_dir, DEFAULT_MODEL_FILENAME)
 
-    # Read metadata to obtain image size
-    dataset_opts = read_metadata(args.base_dataset_dir)
-    size = dataset_opts["size"]
+    opts = dict(
+        size=args.size,
+        step_size=args.step_size,
+        buffer_size=args.buffer_size,
+        rescale_intensity=args.rescale_intensity,
+        lower_cut=args.lower_cut,
+        upper_cut=args.upper_cut,
+        block_size=args.block_size)
+    _logger.info('Options: %s', opts)
+
+    _logger.info('Collect all rasters from %s', args.rasters_dir)
+    rasters = all_raster_files(args.rasters_dir)
+
+    validate_rasters_band_count(rasters)
+
+    builder = CnnTrainsetBuilder(rasters, args.vector, **opts)
+    builder.build(args.output_dir)
 
     # Set seed number
     if args.seed:
@@ -155,13 +211,13 @@ def main(args):
         random.seed(args.seed)
 
     # Gather all files in dataset
-    true_files = glob.glob(os.path.join(args.base_dataset_dir, 't', '*.jpg'))
-    false_files = glob.glob(os.path.join(args.base_dataset_dir, 'f', '*.jpg'))
+    true_files = glob.glob(os.path.join(args.output_dir, 't', '*.jpg'))
+    false_files = glob.glob(os.path.join(args.output_dir, 'f', '*.jpg'))
 
     # Split dataset into train, validation and test sets
     split_dataset(
         (true_files, false_files),
-        dataset_dir,
+        args.output_dir,
         test_size=args.test_size,
         validation_size=args.validation_size,
         balancing_multiplier=args.balancing_multiplier)
@@ -169,13 +225,35 @@ def main(args):
     # Train and save model
     train(
         output_model,
-        dataset_dir,
+        args.output_dir,
         trainable_layers=args.trainable_layers,
         batch_size=args.batch_size,
         epochs=args.epochs,
-        size=size)
+        size=args.size)
 
     _logger.info('Done')
+
+
+def validate_rasters_band_count(rasters):
+    """Validate all rasters have a count of 4 bands
+
+    Returns True if they are all valid.
+    Otherwise it raises a RuntimeError.
+
+    """
+    _logger.debug('Validate rasters band count')
+    for raster_path in rasters:
+        count = get_raster_band_count(raster_path)
+        if count != BAND_COUNT:
+            raise RuntimeError(
+                'Rasters must have exactly 4 bands (was {})'.format(count))
+    return True
+
+
+def get_raster_band_count(raster_path):
+    """Return band count of +raster_path+"""
+    with rasterio.open(raster_path) as dataset:
+        return dataset.count
 
 
 def run():
