@@ -14,7 +14,8 @@ def test_cnn_trainset_builder():
         size=128,
         step_size=64)
 
-    with tempfile.TemporaryDirectory(prefix='aplatam_test_') as tmpdir:
+    with tempfile.TemporaryDirectory(
+            prefix='aplatam_test_build_trainset') as tmpdir:
         builder.build(tmpdir)
 
         metadata_path = os.path.join(tmpdir, 'metadata.json')

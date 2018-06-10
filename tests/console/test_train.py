@@ -1,4 +1,1 @@
-# -*- coding: utf-8 -*-
-
-# import pytest
-# from aplatam.console.train import *
+import aplatam.console.train as ap_train

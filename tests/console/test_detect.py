@@ -1,4 +1,1 @@
-# -*- coding: utf-8 -*-
-
-# import pytest
-# from aplatam.console.detect import *
+import aplatam.console.detect as ap_detect

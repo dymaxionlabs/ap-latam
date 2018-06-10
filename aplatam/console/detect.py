@@ -8,18 +8,9 @@ polygons.
 import argparse
 import logging
 import sys
-import rasterio as rio
-import glob
-import os
-import tqdm
-import numpy as np
-from skimage import exposure
-from keras.preprocessing.image import ImageDataGenerator
-from aplatam.old.util import window_to_bounds, sliding_windows
 
-from aplatam.detect import detect
 from aplatam import __version__
-import json
+from aplatam.detect import detect
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -43,8 +34,8 @@ def parse_args(args):
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="...")
-    # Mandatory arguments
 
+    # Mandatory arguments
     parser.add_argument('model_file', help='HDF5 Keras model file path')
     parser.add_argument(
         'input_dir', help='Path where test hi-res images are stored')

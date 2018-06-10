@@ -156,12 +156,6 @@ def main(args):
     _logger.info('Done')
 
 
-def get_vector_crs(vector_path):
-    """Return CRS of +vector_path+"""
-    with fiona.open(vector_path) as dataset:
-        return dataset.crs
-
-
 def validate_rasters_band_count(rasters):
     """
     Validates all rasters have a count of 4 bands
