@@ -7,17 +7,17 @@ import warnings
 _logger = logging.getLogger(__name__)
 
 
-def split_dataset(files,
-                  output_dir,
+def split_dataset(true_samples,
+                  false_samples,
                   test_size=0.25,
                   validation_size=0.25,
                   balancing_multiplier=1):
     """
-    Split a list of files into training, validation and test datasets
+    Split a list of samples into training, validation and test datasets
 
     Arguments:
-        files {list(string)} -- list of file paths
-        output_dir {string} -- output directory name
+        true_samples {list(obj)} -- list of true samples
+        false_samples {list(obj)} -- list of false samples
         test_size {float} -- proportion of test set from total of true samples
         validation_size {float} -- proportion of validation set from total of
             true samples.
@@ -31,43 +31,43 @@ def split_dataset(files,
         'validation_size should be between 0.0 and 1.0')
     assert balancing_multiplier >= 1.0, 'aug should be greater or equal to 1'
 
+    if len(true_samples) >= len(false_samples):
+        warnings.warn('There are more true samples than false samples')
+
     # First shuffle dataset
-    true_files, false_files = files
-
-    if len(true_files) < len(false_files):
-        warnings.warn('There are less true samples than false samples')
-
-    random.shuffle(true_files)
-    random.shuffle(false_files)
+    random.shuffle(true_samples)
+    random.shuffle(false_samples)
 
     # Calculate test size based on total of true samples
-    n_total = min(len(true_files), len(false_files))
-    n_test_t = round(n_total * test_size)
-    n_test_f = round(n_test_t * balancing_multiplier)
+    n_total_true = min(len(true_samples), len(false_samples))
+    _logger.info('Total true samples: %d', n_total_true)
+    n_total_false = round(n_total_true * balancing_multiplier)
+    _logger.info('Total false samples: %d (multiplier %d)', n_total_false,
+                 balancing_multiplier)
 
-    # Split to build test set
-    t_test, t_rest = true_files[:n_test_t], true_files[n_test_t:]
-    f_test, f_rest = false_files[:n_test_f], false_files[n_test_f:]
+    true_samples = true_samples[:n_total_true]
+    false_samples = false_samples[:n_total_false]
 
-    # Calculate validation size
-    n_validation_t = round(n_total * validation_size)
-    n_validation_f = round(n_validation_t * balancing_multiplier)
+    # Calculate sizes
+    n_test_t = round(n_total_true * test_size)
+    n_test_f = round(n_total_false * test_size)
+    n_validation_t = round(n_total_true * validation_size)
+    n_validation_f = round(n_total_false * validation_size)
 
-    # Split again to build validation set
-    t_validation, t_train = t_rest[:n_validation_t], t_rest[n_validation_t:]
-    f_validation, f_train = f_rest[:n_validation_f], f_rest[n_validation_f:]
+    # Split to build sets
+    t_test, t_validation, t_train = true_samples[:n_test_t], true_samples[
+        n_test_t:n_test_t + n_validation_t], true_samples[n_test_t +
+                                                          n_validation_t:]
+    f_test, f_validation, f_train = false_samples[:n_test_f], false_samples[
+        n_test_f:n_test_f + n_validation_f], false_samples[n_test_f +
+                                                           n_validation_f:]
 
     _logger.info('t_train=%d, t_validation=%d, t_test=%d', len(t_train),
                  len(t_validation), len(t_test))
     _logger.info('f_train=%d, f_validation=%d, f_test=%d', len(f_train),
                  len(f_validation), len(f_test))
 
-    copy_files(t_train, os.path.join(output_dir, 'train', 't'))
-    copy_files(f_train, os.path.join(output_dir, 'train', 'f'))
-    copy_files(t_test, os.path.join(output_dir, 'validation', 't'))
-    copy_files(f_test, os.path.join(output_dir, 'validation', 'f'))
-    copy_files(t_test, os.path.join(output_dir, 'test', 't'))
-    copy_files(f_test, os.path.join(output_dir, 'test', 'f'))
+    return ((t_train, f_train), (t_validation, f_validation), (t_test, f_test))
 
 
 def copy_files(files, dst_dir):

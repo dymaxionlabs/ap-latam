@@ -10,6 +10,7 @@ import logging
 import os
 import random
 import sys
+import warnings
 
 import rasterio
 
@@ -78,6 +79,9 @@ def parse_args(args):
         default=0,
         help=
         "if buffer_size > 0, polygons are expanded with a fixed-sized buffer")
+    parser.add_argument(
+        "--rasters-contour",
+        help="path to rasters contour vector file (optional)")
     parser.add_argument(
         "--rescale-intensity",
         dest='rescale_intensity',
@@ -194,8 +198,17 @@ def main(args):
         rescale_intensity=args.rescale_intensity,
         lower_cut=args.lower_cut,
         upper_cut=args.upper_cut,
-        block_size=args.block_size)
+        block_size=args.block_size,
+        test_size=args.test_size,
+        validation_size=args.validation_size,
+        balancing_multiplier=args.balancing_multiplier,
+        rasters_contour=args.rasters_contour)
     _logger.info('Options: %s', opts)
+
+    # Set seed number
+    if args.seed:
+        _logger.info('Seed: %d', args.seed)
+        random.seed(args.seed)
 
     _logger.info('Collect all rasters from %s', args.rasters_dir)
     rasters = all_raster_files(args.rasters_dir)
@@ -204,23 +217,6 @@ def main(args):
 
     builder = CnnTrainsetBuilder(rasters, args.vector, **opts)
     builder.build(args.output_dir)
-
-    # Set seed number
-    if args.seed:
-        _logger.info('Seed: %d', args.seed)
-        random.seed(args.seed)
-
-    # Gather all files in dataset
-    true_files = glob.glob(os.path.join(args.output_dir, 't', '*.jpg'))
-    false_files = glob.glob(os.path.join(args.output_dir, 'f', '*.jpg'))
-
-    # Split dataset into train, validation and test sets
-    split_dataset(
-        (true_files, false_files),
-        args.output_dir,
-        test_size=args.test_size,
-        validation_size=args.validation_size,
-        balancing_multiplier=args.balancing_multiplier)
 
     # Train and save model
     train(
@@ -235,7 +231,7 @@ def main(args):
 
 
 def validate_rasters_band_count(rasters):
-    """Validate all rasters have a count of 4 bands
+    """Validate all rasters have at least 3 bands
 
     Returns True if they are all valid.
     Otherwise it raises a RuntimeError.
@@ -244,9 +240,15 @@ def validate_rasters_band_count(rasters):
     _logger.debug('Validate rasters band count')
     for raster_path in rasters:
         count = get_raster_band_count(raster_path)
-        if count != BAND_COUNT:
+        if count < 3:
             raise RuntimeError(
-                'Rasters must have exactly 4 bands (was {})'.format(count))
+                'Raster {} has {} bands, but should have 3 (true color RGB)'.
+                format(raster_path, count))
+        if count >= 3:
+            warnings.warn(
+                ('Raster {} has more than 3 bands ({}). '
+                 'Going to assume the first 3 bands are RGB...').format(
+                     raster_path, count))
     return True
 
 
