@@ -1,16 +1,20 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 import os
 from functools import partial
 from glob import glob
-import json
+
 import pyproj
 import rasterio
 import rtree
-from shapely.ops import transform
+from rasterio.windows import Window
 from shapely.geometry import mapping
+from shapely.ops import transform
 
 _logger = logging.getLogger(__name__)
+
+METADATA_FILENAME = 'metadata.json'
 
 
 def all_raster_files(dirname, ext='.tif'):
@@ -27,24 +31,11 @@ def create_index(shapes):
     return index
 
 
-def sliding_windows(size, step_size, raster_size):
+def sliding_windows(size, step_size, width, height):
     "Slide a window of +size+ by moving it +step_size+ pixels"
-    h, w = raster_size
-    for i in range(0, h, step_size):
-        for j in range(0, w, step_size):
-            diff_i = (i + size - h) if i + size > h else 0
-            diff_j = (j + size - w) if j + size > w else 0
-            yield (i - diff_i, i + size - diff_i), (j - diff_j,
-                                                    j + size - diff_j)
-
-
-def window_to_bounds(window, affine):
-    """Convert pixels to coordinates in a window"""
-    minx = ((window[1][0], window[1][1]) * affine)[0]
-    maxx = ((window[1][1], window[0][0]) * affine)[0]
-    miny = ((window[1][1], window[0][1]) * affine)[1]
-    maxy = ((window[1][1], window[0][0]) * affine)[1]
-    return minx, miny, maxx, maxy
+    for i in range(0, height - size + 1, step_size):
+        for j in range(0, width - size + 1, step_size):
+            yield Window(j, i, size, size)
 
 
 def reproject_shape(shape, src_crs, dst_crs):
@@ -63,7 +54,7 @@ def get_raster_crs(raster_path):
 
 
 def read_metadata(input_dir):
-    metadata_path = os.path.join(input_dir, 'metadata.json')
+    metadata_path = os.path.join(input_dir, METADATA_FILENAME)
     with open(metadata_path) as src:
         return json.load(src)
 
@@ -71,7 +62,7 @@ def read_metadata(input_dir):
 def write_metadata(output_dir, **kwargs):
     """Write a dictionary as JSON to a file"""
     os.makedirs(output_dir, exist_ok=True)
-    metadata_path = os.path.join(output_dir, 'metadata.json')
+    metadata_path = os.path.join(output_dir, METADATA_FILENAME)
     with open(metadata_path, 'w') as dst:
         json.dump(kwargs, dst)
 
@@ -82,4 +73,4 @@ def write_geojson(shapes, output_path):
         feat = {'type': 'Feature', 'geometry': mapping(shape)}
         dicc['features'].append(feat)
     with open(output_path, 'w') as dst:
-        dst.write(json.dumps(d))
+        dst.write(json.dumps(dicc))
