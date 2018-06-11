@@ -95,7 +95,8 @@ instructions](https://github.com/sdispater/poetry#installation).  Make sure to
 install Poetry using Python 3, in case you also have Python 2 installed.
 
 Now, clone the repository and run `poetry install`.  This will create a virtual
-environment and install all required packages there.
+environment and install all required packages there.  Use `poetry install -E
+gpu` to install GPU dependencies (TensorFlow for GPUs).
 
 Run `make` to run tests and `make cov` to build a code coverage report. You can
 run `make` to do both.
