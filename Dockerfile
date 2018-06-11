@@ -30,7 +30,7 @@ RUN pip install -U poetry
 
 # Install Python packages
 COPY pyproject.toml pyproject.lock /app/
-RUN poetry install --no-dev
+RUN poetry install --no-dev -E gpu
 
 ADD . /app/
 
