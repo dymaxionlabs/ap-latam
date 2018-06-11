@@ -5,7 +5,6 @@ Train a detection model from an already prepared dataset.
 
 """
 import argparse
-import glob
 import logging
 import os
 import random
@@ -16,7 +15,6 @@ import rasterio
 
 from aplatam import __version__
 from aplatam.build_trainset import CnnTrainsetBuilder
-from aplatam.class_balancing import split_dataset
 from aplatam.train_classifier import train
 from aplatam.util import all_raster_files
 
@@ -215,8 +213,9 @@ def main(args):
 
     validate_rasters_band_count(rasters)
 
-    builder = CnnTrainsetBuilder(rasters, args.vector, **opts)
-    builder.build(args.output_dir)
+    if not os.path.exists(args.output_dir):
+        builder = CnnTrainsetBuilder(rasters, args.vector, **opts)
+        builder.build(args.output_dir)
 
     # Train and save model
     train(

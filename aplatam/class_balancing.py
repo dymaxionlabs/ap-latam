@@ -1,7 +1,5 @@
 import logging
-import os
 import random
-import shutil
 import warnings
 
 _logger = logging.getLogger(__name__)
@@ -68,19 +66,3 @@ def split_dataset(true_samples,
                  len(f_validation), len(f_test))
 
     return ((t_train, f_train), (t_validation, f_validation), (t_test, f_test))
-
-
-def copy_files(files, dst_dir):
-    """
-    Copy all files to a destination directory, creating them if needed
-
-    Arguments:
-        files {list(string)} -- list of file paths
-        dst_dir {string} -- destination directory name
-
-    """
-    os.makedirs(dst_dir, exist_ok=True)
-    for src in files:
-        fname = os.path.basename(src)
-        dst = os.path.join(dst_dir, fname)
-        shutil.copyfile(src, dst)

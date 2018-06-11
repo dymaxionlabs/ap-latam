@@ -32,11 +32,8 @@ def test_cnn_trainset_builder():
                 assert metadata[name_argument] == getattr(
                     builder, name_argument)
 
-        test_t = os.path.join(tmpdir, "t")
-        assert os.path.exists(test_t)
-        test_f = os.path.join(tmpdir, "f")
-        assert os.path.exists(test_f)
-        t_jpg = glob.glob(os.path.join(test_t, '*.jpg'))
-        f_jpg = glob.glob(os.path.join(test_f, '*.jpg'))
-        assert t_jpg
-        assert f_jpg
+        for dir_a, dir_b in zip(('train', 'validation', 'test'), ('t', 'f')):
+            dirname = os.path.join(tmpdir, dir_a, dir_b)
+            assert os.path.exists(dirname), '{} exists'.format(dirname)
+            assert glob.glob(os.path.join(
+                dirname, '*.jpg')), '{} contains at least one jpg file'
