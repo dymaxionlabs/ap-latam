@@ -32,7 +32,7 @@ def create_index(shapes):
 
 
 def sliding_windows(size, step_size, width, height):
-    "Slide a window of +size+ by moving it +step_size+ pixels"
+    """Slide a window of +size+ by moving it +step_size+ pixels"""
     for i in range(0, height - size + 1, step_size):
         for j in range(0, width - size + 1, step_size):
             yield Window(j, i, size, size)
@@ -54,6 +54,7 @@ def get_raster_crs(raster_path):
 
 
 def read_metadata(input_dir):
+    """Read metadata JSON file in +input_dir+ into a dictionary"""
     metadata_path = os.path.join(input_dir, METADATA_FILENAME)
     with open(metadata_path) as src:
         return json.load(src)
@@ -68,6 +69,12 @@ def write_metadata(output_dir, **kwargs):
 
 
 def write_geojson(shapes, output_path):
+    """
+    Write a GeoJSON to +output_path+ with each shape in +shapes+ as a feature
+
+    Shapes must be in WGS84 projection
+
+    """
     dicc = {'type': 'FeatureCollection', 'features': []}
     for shape in shapes:
         feat = {'type': 'Feature', 'geometry': mapping(shape)}

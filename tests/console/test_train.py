@@ -1,10 +1,11 @@
+import os
 import tempfile
 
 import pytest
 from mock import call, patch
 
-from aplatam import __version__
 import aplatam.console.train as ap_train
+from aplatam import __version__
 from aplatam.console.train import validate_rasters_band_count
 
 
@@ -15,7 +16,7 @@ def some_rasters():
 
 @pytest.fixture
 def rasters_with_different_band_count(raster):
-    return {'a.tif': 4, 'b.tif': 4, 'c.tif': 3}[raster]
+    return {'a.tif': 3, 'b.tif': 1, 'c.tif': 3}[raster]
 
 
 @pytest.fixture
@@ -35,12 +36,20 @@ def test_validate_rasters_band_count_ok(mock_func, some_rasters):
 def test_validate_rasters_band_count_fail(mock_func, some_rasters):
     with pytest.raises(RuntimeError):
         assert validate_rasters_band_count(some_rasters)
-    mock_func.assert_has_calls([call('a.tif'), call('b.tif'), call('c.tif')])
+    mock_func.assert_has_calls([call('a.tif'), call('b.tif')])
 
 
-def test_run_script_default_arguments():
+@patch('aplatam.console.train.train')
+def test_run_script_default_arguments(train_mock_func):
     with tempfile.TemporaryDirectory(prefix='ap_train') as tmpdir:
-        ap_train.main(['tests/fixtures/', 'tests/fixtures/settlements.geojson', tmpdir])
+        ap_train.main(
+            ['tests/fixtures/', 'tests/fixtures/settlements.geojson', tmpdir])
 
-        # TODO
-        assert True
+        output_model_path = os.path.join(tmpdir, 'model.h5')
+        assert train_mock_func.assert_called_once_with(
+            output_model_path,
+            tmpdir,
+            trainable_layers=5,
+            batch_size=5,
+            epochs=20,
+            size=256)
