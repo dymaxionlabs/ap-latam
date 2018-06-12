@@ -34,6 +34,7 @@ pytest-mock = "^1.10"
 pylint = "^1.9"
 yapf = "^0.22.0"
 coverage = "^4.5"
+rope = "^0.10.7"
 
 [tool.poetry.extras]
 gpu = ["tensorflow-gpu"]
