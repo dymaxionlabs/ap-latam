@@ -81,3 +81,4 @@ def write_geojson(shapes, output_path):
         dicc['features'].append(feat)
     with open(output_path, 'w') as dst:
         dst.write(json.dumps(dicc))
+    _logger.info('%s written', output_path)

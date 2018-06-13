@@ -31,6 +31,7 @@ def detect(model_file,
            rescale_intensity=True,
            lower_cut=2,
            upper_cut=98,
+           save_intermediary_results=False,
            *,
            neighbours,
            threshold,
@@ -41,6 +42,8 @@ def detect(model_file,
 
     if not step_size:
         step_size = img_size
+
+    fname, ext = os.path.splitext(output)
 
     shapes_with_props = predict_images(
         input_dir,
@@ -53,8 +56,16 @@ def detect(model_file,
         upper_cut=upper_cut,
         threshold=threshold)
 
+    if save_intermediary_results:
+        path = os.path.join(fname, '.base', ext)
+        write_geojson([s.shape for s in shapes_with_props], path)
+
     shapes_with_props = filter_features_by_mean_prob(
         shapes_with_props, neighbours, mean_threshold)
+
+    if save_intermediary_results:
+        path = os.path.join(fname, '.mean', ext)
+        write_geojson([s.shape for s in shapes_with_props], path)
 
     shapes = [s.shape for s in shapes_with_props]
     shapes = dissolve_overlapping_shapes(shapes)

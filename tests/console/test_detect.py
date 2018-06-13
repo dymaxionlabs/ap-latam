@@ -25,4 +25,5 @@ def test_run_script_default_arguments(train_mock_func):
             lower_cut=2,
             upper_cut=98,
             step_size=None,
-            threshold=0.3)
+            threshold=0.3,
+            save_intermediary_results=False)
