@@ -108,13 +108,13 @@ class CnnTrainsetBuilder:
 
             percentiles = self._calculate_percentiles(raster)
 
+            new_contour_shape = self._reproject_contour_shape(
+                contour_shape, contour_crs, raster_crs)
+
             new_shapes = self._reproject_shapes(shapes, vector_crs, raster_crs)
             new_shapes = self._apply_buffer(new_shapes)
             new_shapes = self._intersection_with_raster_extent(
                 new_shapes, raster)
-
-            new_contour_shape = self._reproject_contour_shape(
-                contour_shape, contour_crs, raster_crs)
 
             self._extract_samples(
                 raster=raster,
@@ -174,7 +174,7 @@ class CnnTrainsetBuilder:
 
         index = create_index(shapes)
 
-        windows_and_boxes = self._apply_sliding_windows(raster)
+        windows_and_boxes = self._sliding_windows(raster)
         _logger.info('Total windows: %d', len(windows_and_boxes))
 
         if contour_polygon:
@@ -211,7 +211,7 @@ class CnnTrainsetBuilder:
                     windows[j], raster, percentiles,
                     os.path.join(output_dir, dirname, cls_name))
 
-    def _apply_sliding_windows(self, raster):
+    def _sliding_windows(self, raster):
         with rasterio.open(raster) as src:
             windows = sliding_windows(
                 self.size, self.step_size, height=src.height, width=src.width)

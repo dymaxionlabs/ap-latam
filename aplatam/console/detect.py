@@ -38,10 +38,53 @@ def parse_args(args):
     # Mandatory arguments
     parser.add_argument('model_file', help='HDF5 Keras model file path')
     parser.add_argument(
-        'input_dir', help='Path where test hi-res images are stored')
+        'input_dir', help='path where test hi-res images are stored')
     parser.add_argument('output', help='GeoJSON output file')
 
     # Options
+
+    parser.add_argument(
+        '--step-size',
+        default=None,
+        help='step size of sliding windows (if none, same as size)')
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.3,
+        help='probability threshold for windows')
+    parser.add_argument(
+        "--neighbours",
+        type=int,
+        default=3,
+        help='number of neighbouring windows to merge on mean post-processing')
+    parser.add_argument(
+        "--mean-threshold",
+        type=float,
+        default=0.3,
+        help='threshold for mean post-processing')
+    parser.add_argument(
+        "--rescale-intensity",
+        dest='rescale_intensity',
+        default=True,
+        action='store_true',
+        help="rescale intensity")
+    parser.add_argument(
+        "--no-rescale-intensity",
+        dest='rescale_intensity',
+        action='store_false',
+        help="do not rescale intensity")
+    parser.add_argument(
+        "--lower-cut",
+        type=int,
+        default=2,
+        help=
+        "lower cut of percentiles for cumulative count in intensity rescaling")
+    parser.add_argument(
+        "--upper-cut",
+        type=int,
+        default=98,
+        help=
+        "upper cut of percentiles for cumulative count in intensity rescaling")
 
     parser.add_argument(
         '--version',
@@ -61,40 +104,6 @@ def parse_args(args):
         help="set loglevel to DEBUG",
         action='store_const',
         const=logging.DEBUG)
-    parser.add_argument(
-        "--rescale-intensity",
-        dest='rescale_intensity',
-        default=True,
-        action='store_true',
-        help="Rescale intensity")
-    parser.add_argument(
-        "--no-rescale-intensity",
-        dest='rescale_intensity',
-        action='store_false',
-        help="Do not rescale intensity")
-    parser.add_argument(
-        "--lower-cut",
-        type=int,
-        default=2,
-        help=
-        "Lower cut of percentiles for cumulative count in intensity rescaling")
-    parser.add_argument(
-        "--upper-cut",
-        type=int,
-        default=98,
-        help=
-        "upper cut of percentiles for cumulative count in intensity rescaling")
-
-    parser.add_argument(
-        '--step-size',
-        default=None,
-        help='Step size of sliding windows (if none, same as size)')
-
-    parser.add_argument("--threshold", type=float, default=0.3)
-
-    parser.add_argument("--neighbours", type=int, default=3)
-
-    parser.add_argument("--mean-threshold", type=float, default=0.3)
 
     return parser.parse_args(args)
 

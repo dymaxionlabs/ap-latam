@@ -85,18 +85,18 @@ def parse_args(args):
         dest='rescale_intensity',
         default=True,
         action='store_true',
-        help="Rescale intensity")
+        help="rescale intensity")
     parser.add_argument(
         "--no-rescale-intensity",
         dest='rescale_intensity',
         action='store_false',
-        help="Do not rescale intensity")
+        help="do not rescale intensity")
     parser.add_argument(
         "--lower-cut",
         type=int,
         default=2,
         help=
-        "Lower cut of percentiles for cumulative count in intensity rescaling")
+        "lower cut of percentiles for cumulative count in intensity rescaling")
     parser.add_argument(
         "--upper-cut",
         type=int,
@@ -109,15 +109,14 @@ def parse_args(args):
         "--test-size",
         type=float,
         default=0.25,
-        help=("The proportion of the dataset to include in the test split. "
+        help=("proportion of the dataset to include in the test split. "
               "Float number between 0.0 and 1.0"))
     parser.add_argument(
         "--validation-size",
         type=float,
         default=0.25,
-        help=(
-            "The proportion of the dataset to include in the validation split. "
-            "Float number between 0.0 and 1.0"))
+        help=("proportion of the dataset to include in the validation split. "
+              "Float number between 0.0 and 1.0"))
     parser.add_argument(
         "--balancing-multiplier",
         type=float,
