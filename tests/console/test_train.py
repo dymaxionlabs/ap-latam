@@ -39,7 +39,6 @@ def test_validate_rasters_band_count_fail(mock_func, some_rasters):
     mock_func.assert_has_calls([call('a.tif'), call('b.tif')])
 
 
-#@pytest.mark.skip(reason="issues with TravisCI and tensorflow-gpu")
 @patch('aplatam.console.train.train')
 def test_run_script_default_arguments(train_mock_func):
     with tempfile.TemporaryDirectory(prefix='ap_train') as tmpdir:

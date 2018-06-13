@@ -36,10 +36,10 @@ def predict_image(fname,
     with rio.open(fname) as src:
         matching_windows = []
 
-        windows = sliding_windows(
-            size, step_size, height=src.shape[0], width=src.shape[1])
+        windows = list(sliding_windows(
+            size, step_size, height=src.shape[0], width=src.shape[1]))
 
-        for window in windows:
+        for window in tqdm.tqdm(windows):
             window_box = box(*src.window_bounds(window))
 
             img = np.dstack([src.read(b, window=window) for b in range(1, 4)])
@@ -68,7 +68,7 @@ def predict_images(input_dir, model, size, **kwargs):
     all_windows = []
     files = glob.glob(os.path.join(input_dir, '**/*.tif'), recursive=True)
     _logger.info(files)
-    for fname in tqdm.tqdm(files):
+    for fname in files:
         all_windows.extend(predict_image(fname, model, size, **kwargs))
     _logger.info("Done! Found %d matching windows  on all files ",
                  (len(all_windows)))
