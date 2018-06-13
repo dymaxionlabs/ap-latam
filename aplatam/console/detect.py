@@ -88,11 +88,6 @@ def parse_args(args):
         default=98,
         help=
         "upper cut of percentiles for cumulative count in intensity rescaling")
-    parser.add_argument(
-        '--save-intermediary-results',
-        action='store_true',
-        default=False,
-        help='write post-processing intermediary results GeoJSON files')
 
     parser.add_argument(
         '--version',
@@ -154,8 +149,7 @@ def main(args):
         upper_cut=args.upper_cut,
         neighbours=args.neighbours,
         threshold=args.threshold,
-        mean_threshold=args.mean_threshold,
-        save_intermediary_results=args.save_intermediary_results)
+        mean_threshold=args.mean_threshold)
 
 
 def run():

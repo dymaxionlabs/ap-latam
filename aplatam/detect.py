@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+import pickle
 from collections import namedtuple
 
 import dask_rasterio
@@ -31,7 +32,6 @@ def detect(model_file,
            rescale_intensity=True,
            lower_cut=2,
            upper_cut=98,
-           save_intermediary_results=False,
            *,
            neighbours,
            threshold,
@@ -43,30 +43,39 @@ def detect(model_file,
     if not step_size:
         step_size = img_size
 
-    fname, ext = os.path.splitext(output)
+    fname, _ = os.path.splitext(output)
+    predictions_path = '{}.pred.pkl'.format(fname)
 
-    shapes_with_props = predict_images(
-        input_dir,
-        model,
-        img_size,
-        step_size=step_size,
-        rasters_contour=rasters_contour,
-        rescale_intensity=rescale_intensity,
-        lower_cut=lower_cut,
-        upper_cut=upper_cut,
-        threshold=threshold)
+    if os.path.exists(predictions_path):
+        with open(predictions_path, 'rb') as file:
+            shapes_with_props = pickle.load(file)
+        _logger.info(
+            'Going to reuse existing %s predictions file from a previous run',
+            predictions_path)
+    else:
+        shapes_with_props = predict_images(
+            input_dir,
+            model,
+            img_size,
+            step_size=step_size,
+            rasters_contour=rasters_contour,
+            rescale_intensity=rescale_intensity,
+            lower_cut=lower_cut,
+            upper_cut=upper_cut,
+            threshold=threshold)
 
-    if save_intermediary_results:
-        path = os.path.join(fname, '.base', ext)
-        write_geojson([s.shape for s in shapes_with_props], path)
+        with open(predictions_path, 'wb') as file:
+            pickle.dump(shapes_with_props, file)
+        _logger.info('%s of predicted windows written')
 
+    _logger.info('Total detected windows: %d', len(shapes_with_props))
+
+    # Filter out polygons with low probablity by calculating
+    # mean probability from neighbours.
     shapes_with_props = filter_features_by_mean_prob(
         shapes_with_props, neighbours, mean_threshold)
 
-    if save_intermediary_results:
-        path = os.path.join(fname, '.mean', ext)
-        write_geojson([s.shape for s in shapes_with_props], path)
-
+    # Dissolve overlapping polygons
     shapes = [s.shape for s in shapes_with_props]
     shapes = dissolve_overlapping_shapes(shapes)
 
