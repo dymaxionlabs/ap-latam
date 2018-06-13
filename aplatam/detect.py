@@ -3,12 +3,13 @@ import logging
 import os
 from collections import namedtuple
 
+import dask_rasterio
 import fiona
 import keras
 import numpy as np
 import rasterio as rio
 import tqdm
-from shapely.geometry import shape, box
+from shapely.geometry import box, shape
 from skimage import exposure
 
 from aplatam.post_process import (dissolve_overlapping_shapes,
@@ -67,20 +68,25 @@ def predict_image(fname,
                   threshold,
                   step_size=None,
                   rasters_contour=None,
-                  rescale_intensity=False,
+                  rescale_intensity=True,
                   lower_cut=2,
                   upper_cut=98):
+
     if not step_size:
         step_size = size
+
+    if rescale_intensity:
+        percentiles = calculate_percentiles(
+            fname, lower_cut=lower_cut, upper_cut=upper_cut)
 
     with rio.open(fname) as src:
         matching_windows = []
 
         windows = sliding_windows(
             size, step_size, height=src.shape[0], width=src.shape[1])
-        _logger.info('Total windows: %d', len(windows))
 
         windows_and_boxes = [(w, box(*src.window_bounds(w))) for w in windows]
+        _logger.info('Total windows: %d', len(windows_and_boxes))
 
         if rasters_contour:
             contour_polygon, contour_crs = load_raster_contour_polygon(
@@ -97,8 +103,7 @@ def predict_image(fname,
             img = np.dstack([src.read(b, window=window) for b in range(1, 4)])
 
             if rescale_intensity:
-                low, high = np.percentile(img, (lower_cut, upper_cut))
-                img = exposure.rescale_intensity(img, in_range=(low, high))
+                img = exposure.rescale_intensity(img, in_range=percentiles)
 
             img = img / 255.
             preds = model.predict(np.array([img]))
@@ -133,3 +138,9 @@ def load_raster_contour_polygon(rasters_contour):
     with fiona.open(rasters_contour) as src:
         contour_shape = [shape(feature['geometry']) for feature in src][0]
         return contour_shape, src.crs
+
+
+def calculate_percentiles(raster, block_size=1, *, lower_cut, upper_cut):
+    rgb_img = dask_rasterio.read_raster(
+        raster, band=(1, 2, 3), block_size=block_size)
+    return tuple(np.percentile(rgb_img, (lower_cut, upper_cut)))
