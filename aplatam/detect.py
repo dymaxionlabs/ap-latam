@@ -1,19 +1,19 @@
 import glob
-import json
 import logging
 import os
 from collections import namedtuple
 
+import fiona
 import keras
 import numpy as np
 import rasterio as rio
 import tqdm
-from shapely.geometry import box, mapping
+from shapely.geometry import shape, box
 from skimage import exposure
 
 from aplatam.post_process import (dissolve_overlapping_shapes,
                                   filter_features_by_mean_prob)
-from aplatam.util import (reproject_shape, sliding_windows, write_geojson)
+from aplatam.util import reproject_shape, sliding_windows, write_geojson
 
 _logger = logging.getLogger(__name__)
 
@@ -22,11 +22,51 @@ WGS84_CRS = {"init": "epsg:4326"}
 ShapeWithProps = namedtuple('ShapeWithProps', ['shape', 'props'])
 
 
+def detect(model_file,
+           input_dir,
+           output,
+           rasters_contour=None,
+           step_size=None,
+           rescale_intensity=True,
+           lower_cut=2,
+           upper_cut=98,
+           *,
+           neighbours,
+           threshold,
+           mean_threshold):
+
+    model = keras.models.load_model(model_file)
+    img_size = model.input_shape[1]
+
+    if not step_size:
+        step_size = img_size
+
+    shapes_with_props = predict_images(
+        input_dir,
+        model,
+        img_size,
+        step_size=step_size,
+        rasters_contour=rasters_contour,
+        rescale_intensity=rescale_intensity,
+        lower_cut=lower_cut,
+        upper_cut=upper_cut,
+        threshold=threshold)
+
+    shapes_with_props = filter_features_by_mean_prob(
+        shapes_with_props, neighbours, mean_threshold)
+
+    shapes = [s.shape for s in shapes_with_props]
+    shapes = dissolve_overlapping_shapes(shapes)
+
+    write_geojson(shapes, output)
+
+
 def predict_image(fname,
                   model,
                   size,
                   threshold,
                   step_size=None,
+                  rasters_contour=None,
                   rescale_intensity=False,
                   lower_cut=2,
                   upper_cut=98):
@@ -36,12 +76,24 @@ def predict_image(fname,
     with rio.open(fname) as src:
         matching_windows = []
 
-        windows = list(sliding_windows(
-            size, step_size, height=src.shape[0], width=src.shape[1]))
+        windows = sliding_windows(
+            size, step_size, height=src.shape[0], width=src.shape[1])
+        _logger.info('Total windows: %d', len(windows))
 
-        for window in tqdm.tqdm(windows):
-            window_box = box(*src.window_bounds(window))
+        windows_and_boxes = [(w, box(*src.window_bounds(w))) for w in windows]
 
+        if rasters_contour:
+            contour_polygon, contour_crs = load_raster_contour_polygon(
+                rasters_contour)
+            contour_polygon = reproject_shape(contour_polygon, contour_crs,
+                                              src.crs)
+            windows_and_boxes = [(w, b) for w, b in windows_and_boxes
+                                 if contour_polygon.intersection(b)]
+            _logger.info(
+                'Total windows (after filtering with raster contour shape): %d',
+                len(windows_and_boxes))
+
+        for window, window_box in tqdm.tqdm(windows_and_boxes):
             img = np.dstack([src.read(b, window=window) for b in range(1, 4)])
 
             if rescale_intensity:
@@ -65,43 +117,19 @@ def predict_image(fname,
 
 
 def predict_images(input_dir, model, size, **kwargs):
-    all_windows = []
-    files = glob.glob(os.path.join(input_dir, '**/*.tif'), recursive=True)
-    _logger.info(files)
-    for fname in files:
-        all_windows.extend(predict_image(fname, model, size, **kwargs))
-    _logger.info("Done! Found %d matching windows  on all files ",
-                 (len(all_windows)))
-    return all_windows
+    polygons = []
+
+    rasters = glob.glob(os.path.join(input_dir, '**/*.tif'), recursive=True)
+    _logger.info(rasters)
+
+    for raster in rasters:
+        polygons.extend(predict_image(raster, model, size, **kwargs))
+    _logger.info('Found %d matching windows on all files', (len(polygons)))
+
+    return polygons
 
 
-def build_geojson(shapes_and_roces):
-    dicc = {'type': 'FeatureCollection', 'features': []}
-    for shape in shapes_and_roces:
-        feat = {
-            'type': 'Feature',
-            'geometry': mapping(shape),
-            "properties": []
-        }
-        dicc['features'].append(feat)
-    return json.dumps(dicc)
-
-
-def detect(*, model_file, input_dir, step_size, rescale_intensity, neighbours,
-           threshold, output, mean_threshold):
-
-    model = keras.models.load_model(model_file)
-    img_size = model.input_shape[1]
-
-    shapes_with_props = predict_images(
-        input_dir,
-        model,
-        img_size,
-        step_size=step_size,
-        rescale_intensity=rescale_intensity,
-        threshold=threshold)
-    shapes_with_props = filter_features_by_mean_prob(
-        shapes_with_props, neighbours, mean_threshold)
-    shapes_with = [shape_with.shape for shape_with in shapes_with_props]
-    shape_w = dissolve_overlapping_shapes(shapes_with)
-    write_geojson(shape_w, output)
+def load_raster_contour_polygon(rasters_contour):
+    with fiona.open(rasters_contour) as src:
+        contour_shape = [shape(feature['geometry']) for feature in src][0]
+        return contour_shape, src.crs

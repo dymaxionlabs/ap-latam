@@ -63,6 +63,9 @@ def parse_args(args):
         default=0.3,
         help='threshold for mean post-processing')
     parser.add_argument(
+        "--rasters-contour",
+        help="path to rasters contour vector file (optional)")
+    parser.add_argument(
         "--rescale-intensity",
         dest='rescale_intensity',
         default=True,
@@ -138,11 +141,14 @@ def main(args):
     detect(
         model_file=args.model_file,
         input_dir=args.input_dir,
+        output=args.output,
         step_size=args.step_size,
+        rasters_contour=args.rasters_contour,
         rescale_intensity=args.rescale_intensity,
+        lower_cut=args.lower_cut,
+        upper_cut=args.upper_cut,
         neighbours=args.neighbours,
         threshold=args.threshold,
-        output=args.output,
         mean_threshold=args.mean_threshold)
 
 

@@ -20,6 +20,9 @@ def test_run_script_default_arguments(train_mock_func):
             model_file='tests/fixtures/model.h5',
             neighbours=3,
             output=output_geojson,
+            rasters_contour=None,
             rescale_intensity=True,
+            lower_cut=2,
+            upper_cut=98,
             step_size=None,
             threshold=0.3)

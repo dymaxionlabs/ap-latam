@@ -1,15 +1,13 @@
-import rtree
-from shapely.geometry import shape, mapping
 import numpy as np
+import rtree
 from shapely.ops import unary_union
-import fiona
 
 
 def create_index(shapes_with_props):
     """Create an R-Tree index from a set of features"""
     index = rtree.index.Index()
-    for id, shape_with_props in enumerate(shapes_with_props):
-        index.insert(id, shape_with_props.shape.bounds)
+    for shape_id, shape_with_props in enumerate(shapes_with_props):
+        index.insert(shape_id, shape_with_props.shape.bounds)
     return index
 
 
