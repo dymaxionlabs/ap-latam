@@ -14,8 +14,7 @@ def test_cnn_trainset_builder():
         size=128,
         step_size=64)
 
-    with tempfile.TemporaryDirectory(
-            prefix='aplatam_test_build_trainset') as tmpdir:
+    with tempfile.TemporaryDirectory() as tmpdir:
         builder.build(tmpdir)
         assert_trainset(tmpdir, builder)
 
