@@ -1,6 +1,18 @@
-from rasterio.windows import Window
+import io
+import json
+import os
+import tempfile
 
-from aplatam.util import sliding_windows
+from mock import patch
+from rasterio.windows import Window
+from shapely.geometry import Point
+
+from aplatam.util import (all_raster_files, read_metadata, sliding_windows,
+                          write_geojson)
+
+TIF_FILES = ['data/test/20161215.full.tif']
+POINT = Point(0.0, 0.0)
+DATA_DIC = {'data': 'tdp2'}
 
 
 def test_sliding_windows_whole_width_and_height():
@@ -63,3 +75,26 @@ def test_sliding_windows_odd_size():
         Window(col_off=0, row_off=4, width=4, height=4),
         Window(col_off=2, row_off=4, width=4, height=4),
     ]
+
+
+@patch('aplatam.util.glob', return_value=TIF_FILES)
+def test_all_raster_files(glob_mock):
+    raster_files = all_raster_files('data/test')
+    list_string = TIF_FILES
+    glob_mock.assert_called_once_with('data/test/**/*.tif', recursive=True)
+    assert raster_files == list_string
+
+
+@patch('aplatam.util.open', return_value=io.StringIO(json.dumps(DATA_DIC)))
+def test_read_metadata(open_mock):
+    metadata_read = read_metadata('data/dtp2')
+    assert metadata_read == DATA_DIC
+    open_mock.assert_called_once_with('data/dtp2/metadata.json')
+
+
+def test_write_geojson():
+    shapes = [POINT for i in range(3)]
+    with tempfile.TemporaryDirectory() as tmpdir:
+        data_path = os.path.join(tmpdir, 'metadata.json')
+        write_geojson(shapes, data_path)
+        assert os.path.exists(data_path)
