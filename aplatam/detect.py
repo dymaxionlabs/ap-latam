@@ -2,7 +2,6 @@ import glob
 import logging
 import os
 import pickle
-from collections import namedtuple
 
 import dask_rasterio
 import fiona
@@ -15,13 +14,12 @@ from skimage import exposure
 
 from aplatam.post_process import (dissolve_overlapping_shapes,
                                   filter_features_by_mean_prob)
-from aplatam.util import reproject_shape, sliding_windows, write_geojson
+from aplatam.util import (ShapeWithProps, reproject_shape,
+                          sliding_windows, write_geojson)
 
 _logger = logging.getLogger(__name__)
 
 WGS84_CRS = {"init": "epsg:4326"}
-
-ShapeWithProps = namedtuple('ShapeWithProps', ['shape', 'props'])
 
 
 def detect(model_file,
@@ -70,16 +68,18 @@ def detect(model_file,
 
     _logger.info('Total detected windows: %d', len(shapes_with_props))
 
+    # FIXME
     # Filter out polygons with low probablity by calculating
     # mean probability from neighbours.
-    shapes_with_props = filter_features_by_mean_prob(
-        shapes_with_props, neighbours, mean_threshold)
+    #shapes_with_props = filter_features_by_mean_prob(
+        #shapes_with_props, neighbours, mean_threshold)
 
+    # FIXME
     # Dissolve overlapping polygons
-    shapes = [s.shape for s in shapes_with_props]
-    shapes = dissolve_overlapping_shapes(shapes)
+    #shapes = [s.shape for s in shapes_with_props]
+    #shapes = dissolve_overlapping_shapes(shapes)
 
-    write_geojson(shapes, output)
+    write_geojson(shapes_with_props, output)
 
 
 def predict_image(fname,
@@ -129,7 +129,7 @@ def predict_image(fname,
             preds = model.predict(np.array([img]))
             preds_b = preds[:, 0]
 
-            for i in np.nonzero(preds_b > threshold)[0]:
+            for i in np.nonzero(preds_b >= threshold)[0]:
                 _logger.info((window, float(preds_b[i])))
                 reproject_window_box = reproject_shape(window_box, src.crs,
                                                        WGS84_CRS)

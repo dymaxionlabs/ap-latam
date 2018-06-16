@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+from collections import namedtuple
 from functools import partial
 from glob import glob
 
@@ -15,6 +16,9 @@ from shapely.ops import transform
 _logger = logging.getLogger(__name__)
 
 METADATA_FILENAME = 'metadata.json'
+
+
+ShapeWithProps = namedtuple('ShapeWithProps', ['shape', 'props'])
 
 
 def all_raster_files(dirname, ext='.tif'):
@@ -77,7 +81,9 @@ def write_geojson(shapes, output_path):
     """
     dicc = {'type': 'FeatureCollection', 'features': []}
     for shape in shapes:
-        feat = {'type': 'Feature', 'geometry': mapping(shape)}
+        feat = {'type': 'Feature',
+                'geometry': mapping(shape.shape),
+                'properties': shape.props}
         dicc['features'].append(feat)
     with open(output_path, 'w') as dst:
         dst.write(json.dumps(dicc))

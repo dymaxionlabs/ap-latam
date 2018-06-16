@@ -7,8 +7,8 @@ from mock import patch
 from rasterio.windows import Window
 from shapely.geometry import Point
 
-from aplatam.util import (all_raster_files, read_metadata, sliding_windows,
-                          write_geojson)
+from aplatam.util import (ShapeWithProps, all_raster_files, read_metadata,
+                          sliding_windows, write_geojson)
 
 TIF_FILES = ['data/test/20161215.full.tif']
 POINT = Point(0.0, 0.0)
@@ -93,7 +93,7 @@ def test_read_metadata(open_mock):
 
 
 def test_write_geojson():
-    shapes = [POINT for i in range(3)]
+    shapes = [ShapeWithProps(shape=POINT, props={}) for i in range(3)]
     with tempfile.TemporaryDirectory() as tmpdir:
         data_path = os.path.join(tmpdir, 'metadata.json')
         write_geojson(shapes, data_path)
