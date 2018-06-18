@@ -36,7 +36,8 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
 
     class_weight = {
         0: 1.,
-        1: round(nb_false_train_samples / nb_true_train_samples)}
+        1: round(nb_false_train_samples / nb_true_train_samples)
+    }
     _logger.info('Class weight: %s', class_weight)
 
     # Build model using ResNet-50 as base input
@@ -54,11 +55,7 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
     train_generator = train_data_generator(train_datagen, train_data_dir,
                                            img_height, img_width, batch_size)
     validation_generator = validation_data_generator(
-        test_datagen, validation_data_dir, img_height, img_width)
-
-    # Configure early stopping to monitor validation accuracy
-    early_stopping = EarlyStopping(
-        monitor='val_acc', min_delta=0, patience=10, verbose=1, mode='auto')
+        test_datagen, validation_data_dir, img_height, img_width, batch_size)
 
     # Start training model
     train_model(
@@ -69,8 +66,7 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
         validation_samples=nb_validation_samples,
         class_weight=class_weight,
         batch_size=batch_size,
-        epochs=epochs,
-        early_stopping=early_stopping)
+        epochs=epochs)
     _logger.info('Training completed')
 
     # Finally, save model to a file
@@ -86,9 +82,14 @@ def build_resnet50_model(img_width, img_height):
         input_shape=(img_width, img_height, 3))
 
 
-def train_model(model, *, train_generator, validation_generator, train_samples, class_weight,
-                validation_samples, batch_size, epochs, early_stopping):
+def train_model(model, *, train_generator, validation_generator, train_samples,
+                class_weight, validation_samples, batch_size, epochs):
     """Train model"""
+
+    # Configure early stopping to monitor validation accuracy
+    early_stopping = EarlyStopping(
+        monitor='val_acc', min_delta=0, patience=10, verbose=1, mode='auto')
+
     model.fit_generator(
         train_generator,
         steps_per_epoch=train_samples // batch_size,
@@ -100,11 +101,12 @@ def train_model(model, *, train_generator, validation_generator, train_samples, 
 
 
 def validation_data_generator(test_datagen, validation_data_dir, img_height,
-                              img_width):
+                              img_width, batch_size):
     """Initiate the test generators with data Augumentation"""
     validation_generator = test_datagen.flow_from_directory(
         validation_data_dir,
         target_size=(img_height, img_width),
+        batch_size=batch_size,
         class_mode="binary")
     return validation_generator
 
