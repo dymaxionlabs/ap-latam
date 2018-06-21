@@ -40,8 +40,6 @@ class CnnTrainsetBuilder:
 
     Keyword Arguments:
         test_size {float} -- proportion of test set from total of true samples
-        validation_size {float} -- proportion of validation set from total of
-            true samples (default: {0.25})
         balancing_multiplier {float} -- proportion of false samples w.r.t
             true samples (e.g. 1.0 = 50% true 50% false) (default: {0.25})
         buffer_size {float} -- size of buffer (default: {0})
@@ -53,13 +51,12 @@ class CnnTrainsetBuilder:
 
     """
 
-    DATASET_DIRNAMES = ('train', 'validation', 'test')
+    DATASET_DIRNAMES = ('train', 'test')
 
     def __init__(self,
                  rasters,
                  vector,
                  test_size=0.25,
-                 validation_size=0.25,
                  balancing_multiplier=1,
                  buffer_size=0,
                  rescale_intensity=True,
@@ -73,7 +70,6 @@ class CnnTrainsetBuilder:
         self.rasters = rasters
         self.vector = vector
         self.test_size = test_size
-        self.validation_size = validation_size
         self.balancing_multiplier = balancing_multiplier
         self.size = size
         self.step_size = step_size
@@ -196,7 +192,6 @@ class CnnTrainsetBuilder:
             matching_windows,
             non_matching_windows,
             test_size=self.test_size,
-            validation_size=self.validation_size,
             balancing_multiplier=self.balancing_multiplier)
 
         # Extract and store images

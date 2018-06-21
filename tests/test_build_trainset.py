@@ -61,7 +61,7 @@ def assert_trainset(tmpdir, builder, empty_dirs=False):
         for name_argument in list_argument:
             assert metadata[name_argument] == getattr(builder, name_argument)
 
-    for dir_a, dir_b in zip(('train', 'validation', 'test'), ('t', 'f')):
+    for dir_a, dir_b in zip(('train', 'test'), ('t', 'f')):
         dirname = os.path.join(tmpdir, dir_a, dir_b)
         assert os.path.exists(dirname), '{} exists'.format(dirname)
         if not empty_dirs:
