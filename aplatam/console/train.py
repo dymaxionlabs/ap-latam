@@ -112,12 +112,6 @@ def parse_args(args):
         help=("proportion of the dataset to include in the test split. "
               "Float number between 0.0 and 1.0"))
     parser.add_argument(
-        "--validation-size",
-        type=float,
-        default=0.25,
-        help=("proportion of the dataset to include in the validation split. "
-              "Float number between 0.0 and 1.0"))
-    parser.add_argument(
         "--balancing-multiplier",
         type=float,
         default=1.0,
@@ -197,7 +191,6 @@ def main(args):
         upper_cut=args.upper_cut,
         block_size=args.block_size,
         test_size=args.test_size,
-        validation_size=args.validation_size,
         balancing_multiplier=args.balancing_multiplier,
         rasters_contour=args.rasters_contour)
     _logger.info('Options: %s', opts)

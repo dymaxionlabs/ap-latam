@@ -17,7 +17,7 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
           epochs, size):
 
     train_data_dir = os.path.join(dataset_dir, 'train')
-    validation_data_dir = os.path.join(dataset_dir, 'validation')
+    validation_data_dir = os.path.join(dataset_dir, 'test')
 
     true_train_files = glob(os.path.join(train_data_dir, 't', '*.jpg'))
     false_train_files = glob(os.path.join(train_data_dir, 'f', '*.jpg'))
