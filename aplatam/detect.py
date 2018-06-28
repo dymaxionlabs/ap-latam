@@ -9,13 +9,14 @@ import keras
 import numpy as np
 import rasterio as rio
 import tqdm
+from keras.applications import resnet50
 from shapely.geometry import box, shape
 from skimage import exposure
 
 from aplatam.post_process import (dissolve_overlapping_shapes,
                                   filter_features_by_mean_prob)
-from aplatam.util import (ShapeWithProps, reproject_shape,
-                          sliding_windows, write_geojson)
+from aplatam.util import (ShapeWithProps, reproject_shape, sliding_windows,
+                          write_geojson)
 
 _logger = logging.getLogger(__name__)
 
@@ -68,11 +69,10 @@ def detect(model_file,
 
     _logger.info('Total detected windows: %d', len(shapes_with_props))
 
-    # FIXME
     # Filter out polygons with low probablity by calculating
     # mean probability from neighbours.
-    #shapes_with_props = filter_features_by_mean_prob(
-        #shapes_with_props, neighbours, mean_threshold)
+    shapes_with_props = filter_features_by_mean_prob(
+        shapes_with_props, neighbours, mean_threshold)
 
     # FIXME
     # Dissolve overlapping polygons
@@ -125,7 +125,8 @@ def predict_image(fname,
             if rescale_intensity:
                 img = exposure.rescale_intensity(img, in_range=percentiles)
 
-            img = img / 255.
+            img = resnet50.preprocess_input(img)
+
             preds = model.predict(np.array([img]))
             preds_b = preds[:, 0]
 
