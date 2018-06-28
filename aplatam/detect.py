@@ -16,7 +16,7 @@ from skimage import exposure
 from aplatam.post_process import (dissolve_overlapping_shapes,
                                   filter_features_by_mean_prob)
 from aplatam.util import (ShapeWithProps, reproject_shape, sliding_windows,
-                          write_geojson)
+                          write_geojson, grouper)
 
 _logger = logging.getLogger(__name__)
 
@@ -56,16 +56,13 @@ def detect(model_file,
             input_dir,
             model,
             img_size,
+            save_to=predictions_path,
             step_size=step_size,
             rasters_contour=rasters_contour,
             rescale_intensity=rescale_intensity,
             lower_cut=lower_cut,
             upper_cut=upper_cut,
             threshold=threshold)
-
-        with open(predictions_path, 'wb') as file:
-            pickle.dump(shapes_with_props, file)
-        _logger.info('%s of predicted windows written')
 
     _logger.info('Total detected windows: %d', len(shapes_with_props))
 
@@ -140,14 +137,20 @@ def predict_image(fname,
         return matching_windows
 
 
-def predict_images(input_dir, model, size, **kwargs):
+def predict_images(input_dir, model, size, save_to, **kwargs):
     polygons = []
 
     rasters = glob.glob(os.path.join(input_dir, '**/*.tif'), recursive=True)
     _logger.info(rasters)
 
-    for raster in rasters:
-        polygons.extend(predict_image(raster, model, size, **kwargs))
+    for raster_group in grouper(rasters, 1000):
+        for raster in raster_group:
+            polygons.extend(predict_image(raster, model, size, **kwargs))
+
+        with open(predictions_path, 'wb') as file:
+            pickle.dump(polygons, file)
+        _logger.info('%s of predicted windows written')
+
     _logger.info('Found %d matching windows on all files', (len(polygons)))
 
     return polygons

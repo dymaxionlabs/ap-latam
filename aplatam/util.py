@@ -88,3 +88,11 @@ def write_geojson(shapes, output_path):
     with open(output_path, 'w') as dst:
         dst.write(json.dumps(dicc))
     _logger.info('%s written', output_path)
+
+
+def grouper(iterable, n, fillvalue=None):
+    "Collect data into fixed-length chunks or blocks"
+    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx"
+    from itertools import zip_longest
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fillvalue)
