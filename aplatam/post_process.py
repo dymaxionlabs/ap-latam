@@ -1,6 +1,7 @@
 import numpy as np
 import rtree
 from shapely.ops import unary_union
+from aplatam.util import ShapeWithProps
 
 
 def create_index(shapes_with_props):
@@ -26,17 +27,32 @@ def prob_mean_filter(shape_id, shapes_with_props, ix, neigh):
     return mean_filter_prob
 
 
-def dissolve_overlapping_shapes(shapes):
+def apply_buffer(shapes_with_props, buffer_size):
+    return [ShapeWithProps(shape=s.shape.buffer(buffer_size), props=s.props) for s in shapes_with_props]
+
+
+def dissolve_overlapping_shapes(shapes_with_props, buffer_size=None):
     res = []
-    while shapes:
-        s = shapes.pop()
+
+    if buffer_size:
+        shapes_with_props = apply_buffer(shapes_with_props, buffer_size)
+
+    new_shape_with_props = None
+    while shapes_with_props:
+        s = shapes_with_props.pop()
         while True:
-            ss = [x for x in shapes if x != s and s.intersection(x).area > 0]
+            ss = [x for x in shapes_with_props if x != s and s.shape.intersection(x.shape).area > 0]
             if not ss:
                 break
-            s = unary_union([s] + ss)
-            shapes = [x for x in shapes if x not in ss]
+
+            new_shape = unary_union([s.shape] + [x.shape for x in ss])
+            new_props = {'prob': np.mean([x.props['prob'] for x in ss])}
+            s = ShapeWithProps(shape=new_shape, props=new_props)
+
+            shapes_with_props = [x for x in shapes_with_props if x not in ss]
+
         res.append(s)
+
     return res
 
 

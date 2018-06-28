@@ -36,12 +36,6 @@ def detect(model_file,
            threshold,
            mean_threshold):
 
-    model = keras.models.load_model(model_file)
-    img_size = model.input_shape[1]
-
-    if not step_size:
-        step_size = img_size
-
     fname, _ = os.path.splitext(output)
     predictions_path = '{}.pred.pkl'.format(fname)
 
@@ -52,6 +46,12 @@ def detect(model_file,
             'Going to reuse existing %s predictions file from a previous run',
             predictions_path)
     else:
+        model = keras.models.load_model(model_file)
+        img_size = model.input_shape[1]
+
+        if not step_size:
+            step_size = img_size
+
         shapes_with_props = predict_images(
             input_dir,
             model,
@@ -74,10 +74,8 @@ def detect(model_file,
     shapes_with_props = filter_features_by_mean_prob(
         shapes_with_props, neighbours, mean_threshold)
 
-    # FIXME
-    # Dissolve overlapping polygons
-    #shapes = [s.shape for s in shapes_with_props]
-    #shapes = dissolve_overlapping_shapes(shapes)
+    # Extend polygons with a small buffer, and dissolve overlapping polygons
+    shapes_with_props = dissolve_overlapping_shapes(shapes_with_props, buffer_size=0.0001)
 
     write_geojson(shapes_with_props, output)
 
