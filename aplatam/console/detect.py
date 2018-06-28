@@ -45,6 +45,7 @@ def parse_args(args):
 
     parser.add_argument(
         '--step-size',
+        type=int,
         default=None,
         help='step size of sliding windows (if none, same as size)')
     parser.add_argument(
