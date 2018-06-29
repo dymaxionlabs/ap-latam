@@ -21,7 +21,7 @@ from aplatam.util import (ShapeWithProps, reproject_shape, sliding_windows,
 _logger = logging.getLogger(__name__)
 
 WGS84_CRS = {"init": "epsg:4326"}
-BATCH_SIZE = 10
+BATCH_SIZE = 100
 
 
 def detect(model_file,
@@ -155,10 +155,8 @@ def predict_images(input_dir, model, size, save_to, **kwargs):
     rasters = glob.glob(os.path.join(input_dir, '**/*.tif'), recursive=True)
     _logger.info(rasters)
 
-    for raster_group in grouper(rasters, 1000):
-        for raster in raster_group:
-            if raster:
-                polygons.extend(predict_image(raster, model, size, **kwargs))
+    for raster in rasters:
+        polygons.extend(predict_image(raster, model, size, **kwargs))
 
         with open(save_to, 'wb') as file:
             pickle.dump(polygons, file)
