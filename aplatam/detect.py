@@ -21,6 +21,7 @@ from aplatam.util import (ShapeWithProps, reproject_shape, sliding_windows,
 _logger = logging.getLogger(__name__)
 
 WGS84_CRS = {"init": "epsg:4326"}
+BATCH_SIZE = 10
 
 
 def detect(model_file,
@@ -72,7 +73,7 @@ def detect(model_file,
         shapes_with_props, neighbours, mean_threshold)
 
     # Extend polygons with a small buffer, and dissolve overlapping polygons
-    shapes_with_props = dissolve_overlapping_shapes(shapes_with_props, buffer_size=0.00001)
+    shapes_with_props = dissolve_overlapping_shapes(shapes_with_props, buffer_size=None)
 
     write_geojson(shapes_with_props, output)
 
@@ -114,25 +115,36 @@ def predict_image(fname,
                 'Total windows (after filtering with raster contour shape): %d',
                 len(windows_and_boxes))
 
-        for window, window_box in tqdm.tqdm(windows_and_boxes):
-            img = np.dstack([src.read(b, window=window) for b in range(1, 4)])
+        total = len(windows_and_boxes) // BATCH_SIZE
+        for group in tqdm.tqdm(grouper(windows_and_boxes, BATCH_SIZE), total=total):
+            imgs = []
+            window_boxes = []
+            for pair in group:
+                if pair:
+                    window, window_box = pair
 
-            if rescale_intensity:
-                img = exposure.rescale_intensity(img, in_range=percentiles)
+                    img = np.dstack([src.read(b, window=window) for b in range(1, 4)])
 
-            img = resnet50.preprocess_input(img)
+                    if rescale_intensity:
+                        img = exposure.rescale_intensity(img, in_range=percentiles)
 
-            preds = model.predict(np.array([img]))
+                    img = resnet50.preprocess_input(img)
+
+                    imgs.append(img)
+                    window_boxes.append(window_box)
+
+            preds = model.predict(np.array(imgs))
             preds_b = preds[:, 0]
 
             for i in np.nonzero(preds_b >= threshold)[0]:
                 _logger.info((window, float(preds_b[i])))
+                window_box = window_boxes[i]
                 reproject_window_box = reproject_shape(window_box, src.crs,
                                                        WGS84_CRS)
-                shape_with = ShapeWithProps(
+                s = ShapeWithProps(
                     shape=reproject_window_box, props={})
-                shape_with.props["prob"] = float(preds_b[i])
-                matching_windows.append(shape_with)
+                s.props['prob'] = float(preds_b[i])
+                matching_windows.append(s)
 
         return matching_windows
 
@@ -145,9 +157,10 @@ def predict_images(input_dir, model, size, save_to, **kwargs):
 
     for raster_group in grouper(rasters, 1000):
         for raster in raster_group:
-            polygons.extend(predict_image(raster, model, size, **kwargs))
+            if raster:
+                polygons.extend(predict_image(raster, model, size, **kwargs))
 
-        with open(predictions_path, 'wb') as file:
+        with open(save_to, 'wb') as file:
             pickle.dump(polygons, file)
         _logger.info('%s of predicted windows written')
 
