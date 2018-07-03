@@ -39,7 +39,7 @@ def parse_args(args):
     parser.add_argument('model_file', help='HDF5 Keras model file path')
     parser.add_argument(
         'input_dir', help='path where test hi-res images are stored')
-    parser.add_argument('output', help='GeoJSON output file')
+    parser.add_argument('output', help='Shapefile output file')
 
     # Options
 

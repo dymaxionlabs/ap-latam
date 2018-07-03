@@ -9,9 +9,11 @@ from glob import glob
 import pyproj
 import rasterio
 import rtree
+import fiona
 from rasterio.windows import Window
 from shapely.geometry import mapping
 from shapely.ops import transform
+from fiona.crs import from_epsg
 
 _logger = logging.getLogger(__name__)
 
@@ -88,6 +90,25 @@ def write_geojson(shapes, output_path):
     with open(output_path, 'w') as dst:
         dst.write(json.dumps(dicc))
     _logger.info('%s written', output_path)
+
+
+def write_shapefile(shapes, output_path):
+    """
+    Write a Shapefile to +output_path+ with each shape in +shapes+ as a feature
+
+    Shapes must be in WGS84 projection
+
+    """
+    schema = {'geometry': 'MultiPolygon', 'properties': {}}
+    schema['properties']['prob'] = 'float'
+    kwargs = {'crs': from_epsg(4326), 'driver': 'ESRI Shapefile', 'schema': schema}
+
+    with fiona.open(output_path, 'w', **kwargs) as dst:
+        for shape in shapes:
+            feat = {'type': 'Feature',
+                    'geometry': mapping(shape.shape),
+                    'properties': shape.props}
+            dst.write(feat)
 
 
 def grouper(iterable, n, fillvalue=None):

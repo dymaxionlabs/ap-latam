@@ -16,7 +16,7 @@ from skimage import exposure
 from aplatam.post_process import (dissolve_overlapping_shapes,
                                   filter_features_by_mean_prob)
 from aplatam.util import (ShapeWithProps, reproject_shape, sliding_windows,
-                          write_geojson, grouper)
+                          write_shapefile, grouper)
 
 _logger = logging.getLogger(__name__)
 
@@ -75,7 +75,8 @@ def detect(model_file,
     # Extend polygons with a small buffer, and dissolve overlapping polygons
     shapes_with_props = dissolve_overlapping_shapes(shapes_with_props, buffer_size=None)
 
-    write_geojson(shapes_with_props, output)
+    write_shapefile(shapes_with_props, output)
+    #write_geojson(shapes_with_props, output)
 
 
 def predict_image(fname,
