@@ -101,6 +101,7 @@ def write_shapefile(shapes, output_path):
     """
     schema = {'geometry': 'MultiPolygon', 'properties': {}}
     schema['properties']['prob'] = 'float'
+    schema['properties']['prob_mean'] = 'float'
     kwargs = {'crs': from_epsg(4326), 'driver': 'ESRI Shapefile', 'schema': schema}
 
     with fiona.open(output_path, 'w', **kwargs) as dst:

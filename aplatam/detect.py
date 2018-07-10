@@ -78,7 +78,7 @@ def detect(model_file,
         shapes_with_props, neighbours, mean_threshold)
 
     # Extend polygons with a small buffer, and dissolve overlapping polygons
-    shapes_with_props = dissolve_overlapping_shapes(shapes_with_props, buffer_size=None)
+    #shapes_with_props = dissolve_overlapping_shapes(shapes_with_props, buffer_size=None)
 
     write_shapefile(shapes_with_props, output)
     #write_geojson(shapes_with_props, output)

@@ -43,13 +43,24 @@ def dissolve_overlapping_shapes(shapes_with_props, buffer_size=None):
     if buffer_size:
         shapes_with_props = apply_buffer(shapes_with_props, buffer_size)
 
+    _logger.info('Enumerate shapes')
+    for i, shape in enumerate(shapes_with_props):
+        shape.props['id'] = i
+
+    _logger.info('Create index for shapes')
+    ix = create_index(shapes_with_props)
+
     total = len(shapes_with_props)
     with tqdm(total=total) as pbar:
         new_shape_with_props = None
         while shapes_with_props:
             s = shapes_with_props.pop()
+            pbar.update(total - len(shapes_with_props))
+
             while True:
-                ss = [x for x in shapes_with_props if x != s and s.shape.intersection(x.shape).area > 0]
+                intersecting_shape_ids = set(ix.intersection(s.shape.bounds))
+                ss = [x for x in shapes_with_props if x != s and x.props['id']
+                        in intersecting_shape_ids]
                 if not ss:
                     break
 
@@ -71,9 +82,7 @@ def filter_features_by_mean_prob(shapes_with_props, neigh, mean_threshold):
 
     _logger.info('Filter shapes by mean probability in neighbourhoud')
     for shape_id, shape_with_prop in enumerate(tqdm(shapes_with_props)):
-        shape_with_prop.props["prop_mean"] = prob_mean_filter(
+        shape_with_prop.props['prob_mean'] = prob_mean_filter(
             shape_id, shapes_with_props, ix, neigh)
-    return [
-        shape_with_prop for shape_with_prop in shapes_with_props
-        if shape_with_prop.props["prop_mean"] > mean_threshold
-    ]
+
+    return [s for s in shapes_with_props if s.props['prob_mean'] > mean_threshold]
