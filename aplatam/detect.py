@@ -46,6 +46,11 @@ def detect(model_file,
         _logger.info(
             'Going to reuse existing %s predictions file from a previous run',
             predictions_path)
+
+        shapes_with_props = [
+            s for s in shapes_with_props if s.props['prob'] >= threshold]
+        _logger.info('Filter windows again based on threshold %d: %d remaining',
+                threshold, len(shapes_with_props))
     else:
         model = keras.models.load_model(model_file)
         img_size = model.input_shape[1]
