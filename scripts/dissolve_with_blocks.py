@@ -24,6 +24,7 @@ import sys
 import logging
 
 from shapely.geometry import shape, mapping
+from shapely.ops import unary_union
 from tqdm import tqdm
 
 logger = logging.getLogger()
@@ -57,9 +58,9 @@ if __name__ == "__main__":
     with fiona.open(blocks_file) as ds:
         blocks_driver = ds.driver
         blocks_crs = ds.crs
-        block_shapes = [shape(f['geometry']) for f in ds]
+        blocks = list(ds)
 
-    logger.info('Blocks: {}'.format(len(block_shapes)))
+    logger.info('Blocks: {}'.format(len(blocks)))
 
     with fiona.open(windows_file) as ds:
         windows_crs = ds.crs
@@ -73,17 +74,29 @@ if __name__ == "__main__":
     ix = create_index(window_shapes, 'index')
 
     selected_features = []
-    for i, block_shape in enumerate(tqdm(block_shapes)):
-        inter_windows_ids = set(ix.intersection(block_shape.bounds))
-        inter_windows = [windows[i] for i in inter_windows_ids]
+    for i, block in enumerate(tqdm(blocks)):
+        props = block['properties']
+        block_shape = shape(block['geometry'])
+
+        inter_window_ids = set(ix.intersection(block_shape.bounds))
+        inter_window_shapes = [(i, window_shapes[i]) for i in inter_window_ids]
+        inter_window_ids = set(i for i, w in inter_window_shapes if
+                block_shape.intersection(w).area > 0)
+
+        inter_windows = [windows[i] for i in inter_window_ids]
+
         if len(inter_windows):
             logger.debug('Block {}: {} intersecting windows'.format(i, len(inter_windows)))
-            windows_area = sum(shape(w['geometry']).area for w in inter_windows)
-            perc = windows_area / block_shape.area
-            logger.debug('Block area: {}, windows area: {}, {}%'.format(block_shape.area, windows_area, perc))
-            if perc > 0.5:
+
+            union = unary_union([window_shapes[i] for i in inter_window_ids])
+            perc = union.area / block_shape.area
+            logger.debug('Block area: {}, windows area: {}, {}%'.format(
+                block_shape.area, union.area, round(perc, 2)))
+
+            if perc > 0.8:
                 props = dict(prob=mean(w['properties']['prob'] for w in inter_windows))
-                selected_features.append(dict(geometry=mapping(block_shape), properties=props))
+                selected_features.append(dict(geometry=mapping(block_shape),
+                    properties=props))
 
     logger.info('Write output file {}'.format(output_file))
     new_schema = windows_schema
