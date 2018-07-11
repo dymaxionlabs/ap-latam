@@ -40,6 +40,10 @@ def create_index(shapes, index_path):
             ix.insert(s_id, shape.bounds)
     return ix
 
+def mean(array):
+    array = list(array)
+    return sum(array) / len(array)
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
@@ -52,38 +56,39 @@ if __name__ == "__main__":
 
     with fiona.open(blocks_file) as ds:
         blocks_driver = ds.driver
-        blocks_schema = ds.schema.copy()
         blocks_crs = ds.crs
-        blocks = [shape(f['geometry']) for f in ds]
+        block_shapes = [shape(f['geometry']) for f in ds]
 
-    logger.info('Blocks: {}'.format(len(blocks)))
+    logger.info('Blocks: {}'.format(len(block_shapes)))
 
-    with fiona.open(windows_file) as src:
-        windows_crs = src.crs
-        windows = [shape(f['geometry']) for f in src]
+    with fiona.open(windows_file) as ds:
+        windows_crs = ds.crs
+        windows_schema = ds.schema.copy()
+        windows = list(ds)
     logger.info('Windows: {}'.format(len(windows)))
 
     assert(windows_crs == blocks_crs)
 
-    ix = create_index(windows, 'index')
+    window_shapes = [shape(w['geometry']) for w in windows]
+    ix = create_index(window_shapes, 'index')
 
-    selected_blocks = []
-    for i, block in enumerate(tqdm(blocks)):
-        inter_windows_ids = set(ix.intersection(block.bounds))
+    selected_features = []
+    for i, block_shape in enumerate(tqdm(block_shapes)):
+        inter_windows_ids = set(ix.intersection(block_shape.bounds))
         inter_windows = [windows[i] for i in inter_windows_ids]
         if len(inter_windows):
-            logger.info('Block {}: {} intersecting windows'.format(i, len(inter_windows)))
-            windows_area = sum(w.area for w in inter_windows)
-            perc = windows_area / block.area
-            logger.info('Block area: {}, windows area: {}, {}%'.format(block.area, windows_area, perc))
+            logger.debug('Block {}: {} intersecting windows'.format(i, len(inter_windows)))
+            windows_area = sum(shape(w['geometry']).area for w in inter_windows)
+            perc = windows_area / block_shape.area
+            logger.debug('Block area: {}, windows area: {}, {}%'.format(block_shape.area, windows_area, perc))
             if perc > 0.5:
-                selected_blocks.append(block)
+                props = dict(prob=mean(w['properties']['prob'] for w in inter_windows))
+                selected_features.append(dict(geometry=mapping(block_shape), properties=props))
 
     logger.info('Write output file {}'.format(output_file))
-    new_schema = blocks_schema
-    new_schema['properties'] = {}
-    with fiona.open(output_file, 'w', driver=blocks_driver, schema=new_schema,
-            crs=blocks_crs) as ds:
-        for block in selected_blocks:
-            feat = {'geometry': mapping(block), 'properties': {}}
+    new_schema = windows_schema
+    new_schema['properties'] = {'prob': windows_schema['properties']['prob']}
+    opts = dict(driver=blocks_driver, schema=new_schema, crs=blocks_crs)
+    with fiona.open(output_file, 'w', **opts) as ds:
+        for feat in selected_features:
             ds.write(feat)
