@@ -25,7 +25,7 @@ ENV LANGUAGE en_US.UTF-8
 
 # Install Python packages
 COPY requirements.txt /app/
-RUN pip install -r requirements.txt -E gpu
+RUN pip install -r /app/requirements.txt -E gpu
 
 ADD . /app/
 
