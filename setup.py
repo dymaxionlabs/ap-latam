@@ -159,7 +159,7 @@ setup(
             'pytest',
             'pytest-cov',
             'pytest-mock',
-            'rope'
+            'rope',
             'yapf',
         ],
     },
