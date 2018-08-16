@@ -6,10 +6,9 @@ python:
 
 before_install:
   - sudo apt-get install -y build-essential gdal-bin libgdal-dev libproj-dev libspatialindex-dev
-  - pip install poetry==0.11.2
 
 install:
-  - poetry install
+  - pip install -e .
 
 addons:
   apt:
