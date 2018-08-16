@@ -89,14 +89,9 @@ run:
 sudo apt install libproj-dev gdal-bin build-essential libgdal-dev libspatialindex-dev python3-venv virtualenv
 ```
 
-This project is being managed by [Poetry](https://github.com/sdispater/poetry).
-If you do not have it installed, please refer to [Poetry
-instructions](https://github.com/sdispater/poetry#installation).  Make sure to
-install Poetry using Python 3, in case you also have Python 2 installed.
-
-Now, clone the repository and run `poetry install`.  This will create a virtual
-environment and install all required packages there.  Use `poetry install -E
-gpu` to install GPU dependencies (TensorFlow for GPUs).
+Clone the repository and run `python setup.py install` to install the package
+with its dependencies.  Add `--extras gpu` to install GPU dependencies
+(TensorFlow for GPUs).
 
 Run `make` to run tests and `make cov` to build a code coverage report. You can
 run `make` to do both.
