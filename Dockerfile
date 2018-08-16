@@ -12,8 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       libproj-dev \
       libspatialindex-dev \
       locales \
-      python3-venv \
-      virtualenv \
   && rm -rf /var/lib/apt/lists/*
 
 # Configure locale
@@ -25,12 +23,9 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-# Install Poetry
-RUN pip install -U poetry
-
 # Install Python packages
-COPY pyproject.toml pyproject.lock /app/
-RUN poetry install --no-dev -E gpu
+COPY requirements.txt /app/
+RUN pip install -r requirements.txt -E gpu
 
 ADD . /app/
 
