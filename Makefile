@@ -1,12 +1,12 @@
 .PHONY: test cov
 
 cov:
-	poetry run coverage run -m pytest
-	poetry run coverage report
-	poetry run coverage html
+	coverage run -m pytest
+	coverage report
+	coverage html
 
 test:
-	poetry run pytest
+	pytest
 
 build_image:
 	docker build -t dymaxionlabs/ap-latam:latest .
