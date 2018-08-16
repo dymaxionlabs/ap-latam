@@ -1,0 +1,12 @@
+rtree==0.8.3
+shapely==1.6.4.post1
+scikit-image==0.14
+numpy==1.14
+pyproj==1.9.5.1
+tqdm==4.23
+keras==2.1
+fiona==1.7.11.post2
+rasterio==1.0
+tensorflow==1.8
+tensorflow-gpu==1.8
+dask-rasterio==0.2.1
