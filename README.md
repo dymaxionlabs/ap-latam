@@ -7,7 +7,7 @@
 This is the main repository of AP Latam project.
 
 For more information on the website frontend, see the repository at
-[https://github.com/dymaxionlabs/ap-latam-web](dymaxionlabs/ap-latam-web).
+[https://github.com/dymaxionlabs/ap-latam-web](https://github.com/dymaxionlabs/ap-latam-web).
 
 
 ## Dependencies
