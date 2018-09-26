@@ -48,12 +48,13 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
     compile_model(model)
 
     # Prepare data generators for training and test sets
-    opts = dict(
+    # Augment data by performing horizontal/vertical flips
+    train_datagen = ImageDataGenerator(
         horizontal_flip=True,
         vertical_flip=True,
         preprocessing_function=applications.resnet50.preprocess_input)
-    train_datagen = ImageDataGenerator(**opts)
-    test_datagen = ImageDataGenerator(**opts)
+    test_datagen = ImageDataGenerator(
+        preprocessing_function=applications.resnet50.preprocess_input)
 
     train_generator = train_data_generator(train_datagen, train_data_dir,
                                            img_height, img_width, batch_size)
