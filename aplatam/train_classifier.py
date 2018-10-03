@@ -50,8 +50,10 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
     test_datagen = ImageDataGenerator(
         preprocessing_function=applications.resnet50.preprocess_input)
 
+    train_data_dir = os.path.join(dataset_dir, 'train')
     train_generator = train_data_generator(train_datagen, train_data_dir,
                                            img_height, img_width, batch_size)
+    validation_data_dir = os.path.join(dataset_dir, 'test')
     validation_generator = validation_data_generator(
         test_datagen, validation_data_dir, img_height, img_width, batch_size)
 
@@ -68,8 +70,7 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
     _logger.info('Training completed')
 
     # Finally, save model to a file
-    model.save(output_model_file)
-    _logger.info('Model saved as %s', output_model_file)
+    save_model(model, output_model_file)
 
 
 def build_resnet50_model(img_width, img_height):
@@ -173,3 +174,8 @@ def find_false_samples(dirname):
 
 def find_all_samples(dirname):
     return glob(os.path.join(dirname, '**', '*.jpg'))
+
+
+def save_model(model, outpath):
+    model.save(outpath)
+    _logger.info('Model saved as %s', outpath)

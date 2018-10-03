@@ -38,3 +38,25 @@ def test_find_false_samples(glob_mock):
 def test_find_dataset_files(find_all_mock, find_false_mock, find_true_mock):
     files_dict = find_dataset_files(DATASET_DIR)
     assert isinstance(files_dict, dict)
+    assert files_dict['true_train'] == TRAIN_TRUE_FILES
+    assert files_dict['false_train'] == TRAIN_FALSE_FILES
+    assert files_dict['validation'] == VALIDATION_FILES
+
+
+DATASET_DICT = dict(true_train=TRAIN_TRUE_FILES,
+                    false_train=TRAIN_FALSE_FILES,
+                    validation=VALIDATION_FILES)
+
+
+@patch('aplatam.train_classifier.save_model')
+@patch('aplatam.train_classifier.train_model')
+@patch('aplatam.train_classifier.train_data_generator')
+@patch('aplatam.train_classifier.validation_data_generator')
+@patch('aplatam.train_classifier.find_dataset_files', return_value=DATASET_DICT)
+def test_train(find_dataset_files_mock, validation_data_gen_mock, train_data_gen_mock, train_model_mock, save_model_mock):
+    model_file = '/tmp/foo.h5'
+    train(model_file, DATASET_DIR,
+        trainable_layers=30,
+        batch_size=20,
+        epochs=10,
+        size=256)
