@@ -35,47 +35,6 @@ def apply_buffer(shapes_with_props, buffer_size):
     return [ShapeWithProps(shape=s.shape.buffer(buffer_size), props=s.props) for s in shapes_with_props]
 
 
-def dissolve_overlapping_shapes(shapes_with_props, buffer_size=None):
-    _logger.info('Dissolve overlapping shapes')
-
-    res = []
-
-    if buffer_size:
-        shapes_with_props = apply_buffer(shapes_with_props, buffer_size)
-
-    _logger.info('Enumerate shapes')
-    for i, shape in enumerate(shapes_with_props):
-        shape.props['id'] = i
-
-    _logger.info('Create index for shapes')
-    ix = create_index(shapes_with_props)
-
-    total = len(shapes_with_props)
-    with tqdm(total=total) as pbar:
-        new_shape_with_props = None
-        while shapes_with_props:
-            s = shapes_with_props.pop()
-            pbar.update(total - len(shapes_with_props))
-
-            while True:
-                intersecting_shape_ids = set(ix.intersection(s.shape.bounds))
-                ss = [x for x in shapes_with_props if x != s and x.props['id']
-                        in intersecting_shape_ids]
-                if not ss:
-                    break
-
-                new_shape = unary_union([s.shape] + [x.shape for x in ss])
-                new_props = {'prob': np.mean([x.props['prob'] for x in ss])}
-                s = ShapeWithProps(shape=new_shape, props=new_props)
-
-                shapes_with_props = [x for x in shapes_with_props if x not in ss]
-                pbar.update(total - len(shapes_with_props))
-
-            res.append(s)
-
-    return res
-
-
 def filter_features_by_mean_prob(shapes_with_props, neigh, mean_threshold):
     _logger.info('Create index for shapes')
     ix = create_index(shapes_with_props)

@@ -13,8 +13,7 @@ from keras.applications import resnet50
 from shapely.geometry import box, shape
 from skimage import exposure
 
-from aplatam.post_process import (dissolve_overlapping_shapes,
-                                  filter_features_by_mean_prob)
+from aplatam.post_process import filter_features_by_mean_prob
 from aplatam.util import (ShapeWithProps, reproject_shape, sliding_windows,
                           write_shapefile, grouper)
 
