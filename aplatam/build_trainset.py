@@ -242,7 +242,7 @@ class CnnTrainsetBuilder:
 
     def _reproject_shapes(self, shapes, src_crs, dst_crs):
         """Reproject shapes from CRS +src_crs+ to +dst_crs+"""
-        if src_crs != dst_crs:
+        if dict(src_crs) != dict(dst_crs):
             _logger.info('Reproject shapes from %s to %s', src_crs, dst_crs)
             return [reproject_shape(s, src_crs, dst_crs) for s in shapes]
         else:
