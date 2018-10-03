@@ -16,23 +16,17 @@ _logger = logging.getLogger(__name__)
 def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
           epochs, size):
 
-    train_data_dir = os.path.join(dataset_dir, 'train')
-    validation_data_dir = os.path.join(dataset_dir, 'test')
-
-    true_train_files = glob(os.path.join(train_data_dir, 't', '*.jpg'))
-    false_train_files = glob(os.path.join(train_data_dir, 'f', '*.jpg'))
-    train_files = true_train_files + false_train_files
-    validation_files = glob(os.path.join(validation_data_dir, '**', '*.jpg'))
-
-    nb_true_train_samples = len(true_train_files)
-    nb_false_train_samples = len(false_train_files)
-    nb_train_samples = len(train_files)
-    nb_validation_samples = len(validation_files)
-
     img_width, img_height = size, size
 
     assert size >= 197, \
         'image size must be at least 197x197, but was {size}x{size}'.format(size=size)
+
+    dataset_files = find_dataset_files(dataset_dir)
+
+    nb_true_train_samples = len(dataset_files['true_train'])
+    nb_false_train_samples = len(dataset_files['false_train'])
+    nb_train_samples = nb_true_train_samples + nb_false_train_samples
+    nb_validation_samples = len(dataset_files['validation'])
 
     class_weight = {
         0: 1.,
@@ -153,3 +147,29 @@ def freeze_layers(model, trainable_layers):
     for layer in model.layers:
         _logger.debug('Layer %s is trainable: %s', layer.name, layer.trainable)
     _logger.debug('Model summary: %s', model.summary())
+
+
+def find_dataset_files(dataset_dir):
+    """List of training and validation files on +dataset_dir+"""
+    train_data_dir = os.path.join(dataset_dir, 'train')
+    validation_data_dir = os.path.join(dataset_dir, 'test')
+
+    true_train = find_true_samples(train_data_dir)
+    false_train = find_false_samples(train_data_dir)
+    validation = find_all_samples(validation_data_dir)
+
+    return dict(true_train=true_train,
+                false_train=false_train,
+                validation=validation)
+
+
+def find_true_samples(dirname):
+    return glob(os.path.join(dirname, 't', '*.jpg'))
+
+
+def find_false_samples(dirname):
+    return glob(os.path.join(dirname, 'f', '*.jpg'))
+
+
+def find_all_samples(dirname):
+    return glob(os.path.join(dirname, '**', '*.jpg'))
