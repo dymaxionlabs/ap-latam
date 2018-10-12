@@ -5,22 +5,21 @@ roofs (building outlines) in satellite imagery.
 
 ## Usage
 
-First clone the repository from here
+First clone the Mask-RCNN repository from Matterports.  This script was tested
+on commit `41e7c596ebb83b05a4154bb0ac7a28e0b9afd017` so to make sure it works,
+clone and checkout there:based on that commit:
 
-    git clone https://github.com/matterport/Mask_RCNN
-    cd Mask_RCNN/
-
-This script was tested on commit `41e7c596ebb83b05a4154bb0ac7a28e0b9afd017`
-so to make sure it works, checkout:
-
+    git clone https://github.com/matterport/Mask_RCNN ~/Mask_RCNN
+    cd ~/Mask_RCNN
     git checkout 41e7c596ebb83b05a4154bb0ac7a28e0b9afd017
 
-Create a directory on samples/ for storing this script, and then copy it:
+Create a directory on `samples/` for storing the files in this directory:
 
     mkdir samples/buildings
-    cp buildings.py samples/buildings/
+    cd -
+    cp buildings.py *.ipynb ~/Mask_RCNN/samples/buildings/
 
-Check buildings.py for instructions on how to train and detect.
+Check `buildings.py` for instructions on how to train and detect.
 
 You will also need to download [CrowdAI Mapping Challenge
 datasets](https://www.crowdai.org/challenges/mapping-challenge/dataset_files).
