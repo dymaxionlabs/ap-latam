@@ -24,6 +24,8 @@ Check buildings.py for instructions on how to train and detect.
 
 You will also need to download [CrowdAI Mapping Challenge
 datasets](https://www.crowdai.org/challenges/mapping-challenge/dataset_files).
+Decompress both `train.tar.gz` and `val.tar.gz` on
+`datasets/buildings` as `train`, `val` directories respectively.
 
 ## License
 
