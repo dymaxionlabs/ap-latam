@@ -241,7 +241,12 @@ class CnnTrainsetBuilder:
     def _read_shapes(self):
         """Read features from the vector file and return their geometry shapes"""
         with fiona.open(self.vector) as data:
-            return [(shape(feat['geometry'])) for feat in data], data.crs
+            shapes = [(shape(feat['geometry'])) for feat in data]
+            valid_shapes = [s for s in shapes if s.is_valid]
+            if len(valid_shapes) != len(shapes):
+                num_invalid_shapes = len(shapes) - len(valid_shapes)
+                _logger.warn("Invalid geometries were found! %d invalid shapes.", num_invalid_shapes)
+            return valid_shapes, data.crs
 
     def _reproject_shapes(self, shapes, src_crs, dst_crs):
         """Reproject shapes from CRS +src_crs+ to +dst_crs+"""
