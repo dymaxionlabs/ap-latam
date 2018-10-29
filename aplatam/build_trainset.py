@@ -104,8 +104,11 @@ class CnnTrainsetBuilder:
 
             percentiles = self._calculate_percentiles(raster)
 
-            new_contour_shape = self._reproject_contour_shape(
-                contour_shape, contour_crs, raster_crs)
+            if contour_shape:
+                new_contour_shape = self._reproject_contour_shape(
+                    contour_shape, contour_crs, raster_crs)
+            else:
+                new_contour_shape = None
 
             new_shapes = self._reproject_shapes(shapes, vector_crs, raster_crs)
             new_shapes = self._apply_buffer(new_shapes)
