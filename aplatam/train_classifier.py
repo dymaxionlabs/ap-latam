@@ -14,8 +14,8 @@ _logger = logging.getLogger(__name__)
 
 
 def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
-          epochs, size):
-
+          epochs, size, base_model_aplatam = False):
+    pdb.set_trace()
     img_width, img_height = size, size
 
     assert size >= 197, \
@@ -33,9 +33,12 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
         1: round(nb_false_train_samples / nb_true_train_samples)
     }
     _logger.info('Class weight: %s', class_weight)
-
-    # Build model using ResNet-50 as base input
-    base_model = build_resnet50_model(img_width, img_height)
+    if base_model_aplatam :
+        # Build base model from a previously trained model with ap-latam
+        base_model = build_aplatam_model(img_width, img_height)
+    else:
+        # Build model using ResNet-50 as base input
+        base_model = build_resnet50_model(img_width, img_height)
     freeze_layers(base_model, trainable_layers)
     outputs = add_custom_layers(base_model)
     model = Model(inputs=base_model.input, outputs=outputs)
@@ -79,6 +82,13 @@ def build_resnet50_model(img_width, img_height):
         weights="imagenet",
         include_top=False,
         input_shape=(img_width, img_height, 3))
+
+def build_aplatam_model(img_width, img_height):
+    """Build a Model from a previously trained one for ap-latam"""
+    #TODO implement it
+    _logger.info('Building base model from previously trained aplatam model')
+    exit()
+
 
 
 def train_model(model, *, train_generator, validation_generator, train_samples,

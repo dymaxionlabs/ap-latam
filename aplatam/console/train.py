@@ -11,12 +11,15 @@ import random
 import sys
 import warnings
 
+from shapely.geometry import box, shape
+
 import rasterio
 
 from aplatam import __version__
 from aplatam.build_trainset import CnnTrainsetBuilder
 from aplatam.train_classifier import train
 from aplatam.util import all_raster_files
+import pdb
 
 __author__ = "Dymaxion Labs"
 __copyright__ = __author__
@@ -146,6 +149,11 @@ def parse_args(args):
         action='store_const',
         const=logging.DEBUG)
 
+    parser.add_argument(
+        "--base_model_aplatam",
+        action='store_true',
+        help="set to fine tune model from previously trained model with ap-latam")
+
     return parser.parse_args(args)
 
 
@@ -208,7 +216,6 @@ def main(args):
     if not os.path.exists(args.output_dir):
         builder = CnnTrainsetBuilder(rasters, args.vector, **opts)
         builder.build(args.output_dir)
-
     # Train and save model
     train(
         output_model,
@@ -217,6 +224,7 @@ def main(args):
         batch_size=args.batch_size,
         epochs=args.epochs,
         size=args.size)
+        # ,base_model_aplatam = args.base_model_aplatam)
 
     _logger.info('Done')
 
