@@ -150,9 +150,9 @@ def parse_args(args):
         const=logging.DEBUG)
 
     parser.add_argument(
-        "--base_model_aplatam",
-        action='store_true',
-        help="set to fine tune model from previously trained model with ap-latam")
+        "--base-model",
+        default = '',
+        help="the path to a previously trained model with ap-latam to fine tune with this data ")
 
     return parser.parse_args(args)
 
@@ -223,8 +223,8 @@ def main(args):
         trainable_layers=args.trainable_layers,
         batch_size=args.batch_size,
         epochs=args.epochs,
-        size=args.size)
-        # ,base_model_aplatam = args.base_model_aplatam)
+        size=args.size
+        ,base_model_aplatam = args.base_model)
 
     _logger.info('Done')
 

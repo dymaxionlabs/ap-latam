@@ -2,11 +2,13 @@ from glob import glob
 import logging
 import os
 
-from keras import applications, optimizers
+from keras import applications, optimizers , models
 from keras.callbacks import EarlyStopping
 from keras.layers import Dense, Dropout, Flatten
 from keras.models import Model
 from keras.preprocessing.image import ImageDataGenerator
+
+import pdb
 
 RESNET_50_LAYERS = 174
 
@@ -14,8 +16,8 @@ _logger = logging.getLogger(__name__)
 
 
 def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
-          epochs, size, base_model_aplatam = False):
-    pdb.set_trace()
+          epochs, size, base_model_aplatam):
+    # pdb.set_trace()
     img_width, img_height = size, size
 
     assert size >= 197, \
@@ -33,14 +35,14 @@ def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
         1: round(nb_false_train_samples / nb_true_train_samples)
     }
     _logger.info('Class weight: %s', class_weight)
-    if base_model_aplatam :
+    if base_model_aplatam != '' :
         # Build base model from a previously trained model with ap-latam
-        base_model = build_aplatam_model(img_width, img_height)
+        base_model = build_aplatam_model(img_width, img_height,base_model_aplatam)
     else:
         # Build model using ResNet-50 as base input
         base_model = build_resnet50_model(img_width, img_height)
     freeze_layers(base_model, trainable_layers)
-    outputs = add_custom_layers(base_model)
+    outputs = add_custom_layers(base_model,base_model_aplatam)
     model = Model(inputs=base_model.input, outputs=outputs)
     compile_model(model)
 
@@ -83,11 +85,11 @@ def build_resnet50_model(img_width, img_height):
         include_top=False,
         input_shape=(img_width, img_height, 3))
 
-def build_aplatam_model(img_width, img_height):
+def build_aplatam_model(img_width, img_height,base_model_aplatam):
     """Build a Model from a previously trained one for ap-latam"""
-    #TODO implement it
     _logger.info('Building base model from previously trained aplatam model')
-    exit()
+    # TODO: for now is hardcoded
+    return models.load_model(base_model_aplatam)
 
 
 
@@ -139,13 +141,14 @@ def compile_model(model):
         metrics=['accuracy'])
 
 
-def add_custom_layers(model):
+def add_custom_layers(model,base_model_aplatam):
     """Adding custom Layers"""
     out = model.output
-    out = Flatten()(out)
-    out = Dense(1024, activation='relu')(out)
-    out = Dropout(0.5)(out)
-    out = Dense(1, activation='sigmoid')(out)
+    if base_model_aplatam == '':
+        out = Flatten()(out)
+        out = Dense(1024, activation='relu')(out)
+        out = Dropout(0.5)(out)
+        out = Dense(1, activation='sigmoid')(out)
     return out
 
 
