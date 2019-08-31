@@ -17,7 +17,6 @@ _logger = logging.getLogger(__name__)
 
 def train(output_model_file, dataset_dir, *, trainable_layers, batch_size,
           epochs, size, base_model_aplatam):
-    # pdb.set_trace()
     img_width, img_height = size, size
 
     assert size >= 197, \
