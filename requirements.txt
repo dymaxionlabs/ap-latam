@@ -8,5 +8,5 @@ keras==2.1
 fiona==1.7.11.post2
 rasterio==1.0
 tensorflow==1.8
-tensorflow-gpu==1.8
+tensorflow-gpu==1.15.4
 dask-rasterio==0.2.1
