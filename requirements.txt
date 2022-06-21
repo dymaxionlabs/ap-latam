@@ -1,7 +1,7 @@
 rtree==0.8.3
 shapely==1.6.4.post1
 scikit-image==0.14
-numpy==1.14
+numpy==1.22.0
 pyproj==1.9.5.1
 tqdm==4.23
 keras==2.1
